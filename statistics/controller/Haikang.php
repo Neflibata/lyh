@@ -83,7 +83,7 @@ class Haikang
 //        $postData["faceInfo"] = ["name"=> "张三", "sex"=> "1"];
 //        $postData["facePic"] = ["faceUrl"=> "http://js2.300c.cn/lhyd/public/uploadFile/20200220/0b3d616e63d3aea9035dda91e3ad9692.jpg"];
         $result = $this->doCurl($postData, $this->face_list_url);
-        return $result;
+        return $result;  
     }
 
 
