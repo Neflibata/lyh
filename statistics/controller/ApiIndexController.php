@@ -115,6 +115,7 @@ class ApiIndexController extends PluginRestBaseController
                 else
                     $member_upload_info->update(["add_num"=>["+=", 1]], ["MUIID"=>["=", $info["MUIID"]]]);
             }
+
         }
         else
             return [false, $retData["msg"]];

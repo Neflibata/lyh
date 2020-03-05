@@ -199,16 +199,4 @@ class Haikang
         curl_close($ch);
         return $data;
     }
-
-    function cs_1()
-    {
-        $postData = [
-                    "pageNo"=> 1,
-                    "pageSize"=> 20,
-                    "treeCode"=> "0"
-        ];
-//        $postData["description"] = $groupName;
-        $result = $this->doCurl($postData, $this->api_search_url);
-        return json_decode($result, true);
-    }
 }
