@@ -36,11 +36,11 @@
     </ul>
     <form class="well form-inline margin-top-20" method="get" action="{:cmf_plugin_url('Resource://school/index')}">
         <select class="form-control" name="search_key">
-            <option value="1">ID</option>
-            <option value="2">地区</option>
-            <option value="3">监控点</option>
+            <option value="1" <if condition="input('request.search_key/s')==1">selected</if>>ID</option>
+            <option value="2" <if condition="input('request.search_key/s')==2">selected</if>>地区</option>
+            <option value="3" <if condition="input('request.search_key/s')==3">selected</if>>监控点</option>
         </select>
-        <input type="text" class="form-control" name="text" style="width: 180px;" value="" placeholder="请输入关键字">
+        <input type="text" class="form-control" name="text" style="width: 180px;" value="{:input('request.text/s','')}" placeholder="请输入关键字">
         <input type="submit" class="btn btn-primary" value="搜索"/>
         <a class="btn btn-danger" href="{:cmf_plugin_url('Resource://school/index')}">清空</a>
         <a href="javascript:;" class="btn btn-info" onclick="create()">创建</a>
