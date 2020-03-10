@@ -35,5 +35,10 @@ class AdminIndexController extends PluginAdminBaseController
         $index=new IndexController();
         return $index->index();
     }
+    public function school()
+    {
+        $school=new SchoolController();
+        return $school->index();
+    }
 
 }

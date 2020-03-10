@@ -1,0 +1,57 @@
+<include file="public@head"/>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .td-head {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<form role="form" id="fm" class="form-horizontal"  enctype="multipart/form-data"  method="post" action="">
+    <input name="id" type="hidden" class="form-control" value="{$vo.id}"/>
+<div style="padding:18px 20px 2px 20px ">
+    <table class="table table-bordered table-hover" style="text-align:center;margin-bottom:0">
+        <tbody>
+        <td class="td-head">学校名称</td>
+        <td>
+            <input name="id" type="text" class="form-control" style="width: 100%;" disabled value="{$vo.id}"/>
+        </td>
+        </tr>
+        <td class="td-head">地区</td>
+        <td>
+            <select class="form-control"  name="indexCode">
+                <volist name="select" id="v">
+                    <option value='{$v.indexCode}'  <if condition="$vo.cameraIndexCode eq $v.indexCode">selected</if>>{$v.name}</option>                             
+                </volist>
+            </select>
+        </td>
+        </tr>
+        <td class="td-head">学校名称</td>
+        <td>
+            <input name="school_name" type="text" class="form-control" style="width: 100%;" value="{$vo.dirName}"/>
+        </td>
+        </tr>
+        <td class="td-head">经度</td>
+        <td>
+            <input name="longitude" type="text" class="form-control" style="width: 100%;" value="{$vo.longitude}" />
+        </td>
+        </tr>
+        <td class="td-head">纬度</td>
+        <td>
+            <input name="latitude" type="text" class="form-control" style="width: 100%;" value="{$vo.latitude}"/>
+        </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</form>
+</body>
+<include file="public@scripts"/>
+<script src="__STATIC__/js/wind.js"></script>
+<script>
+
+
+</script>
+</html>
