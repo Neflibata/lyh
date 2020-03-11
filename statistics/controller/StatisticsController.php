@@ -295,5 +295,8 @@ class StatisticsController extends PluginAdminBaseController
         list($page,$pageNums, $pageStart, $pageCount) = getPage($pageInfo["page"], $pageInfo["limit"], $count);
         return zy_json_echo(true,'连入成功',["data"=>$retData, "pageNums"=>$pageNums,"pageStart"=>$pageStart,"pageCount"=>$pageCount]);
     }
-
+    public function map()
+    {
+        return $this->fetch('/demo/admin_index');
+    }
 }
