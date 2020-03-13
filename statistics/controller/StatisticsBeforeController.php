@@ -43,7 +43,7 @@ class StatisticsBeforeController extends PluginBaseController
         ];
 
         $hk=new Haikang();
-        $result = $hk->doCurl($postData, $hk->api_search_url);
+        $result = $hk->doCurl($postData, $hk->resource_cameras);
         $arr=json_decode($result,true);
         halt($arr);
         return $arr;
@@ -135,8 +135,8 @@ class StatisticsBeforeController extends PluginBaseController
     public function cs_8()
     {
         $postData = [
-            "eventTypes"=> [131614,131659,1644175361,1644171265],
-	        "eventDest"=> "http://js2.300c.cn/lhyd/public/plugin/statistics/api_index/inFace"
+            "eventTypes"=> [851969],
+	        "eventDest"=> "http://js2.300c.cn/lhyd/public/plugin/statistics/api_index/addGps"
         ];
         $hk=new Haikang();
         $arr = $hk->doCurl($postData, $hk->event_byeventtypes);
@@ -193,10 +193,45 @@ class StatisticsBeforeController extends PluginBaseController
     {
         $postData = [
             "indexCodes"=> [],
-            "name"=>"人"
+            "name"=>"重点"
         ];
         $hk=new Haikang();
         $arr = $hk->doCurl($postData, $hk->face_group);
+        halt($arr);
+    }
+    /**
+     * 识别资源
+     */
+    public function cs_13()
+    {
+        $postData = [
+            "indexCodes"=> [],
+            "name"=>"",
+            "recognitionResourceType"=>""
+        ];
+        $hk=new Haikang();
+        $arr = $hk->doCurl($postData, $hk->resource_recognition);
+        halt($arr);
+    }
+    /**
+     * 添加计划
+     */
+    public function cs_14()
+    {
+        $postData = [
+            "name"=> "重点人员测试计划",
+            "faceGroupIndexCodes"=>["f77b25c4-8a25-4d78-91a1-700320320449","5fd42a66-8e55-46fc-9f36-1ffb4f80558f"],//人脸分组
+            "recognitionResourceType"=> "FACE_RECOGNITION_SERVER",//资源类型
+            "recognitionResourceIndexCodes"=>["4e7aa02c-9aac-4e2e-a8b9-e1b49d8800cd"],//识别资源
+            "cameraIndexCodes"=>["54d7449b3e69444886ffb09e2e75ae69"],//抓拍点通道
+            "threshold"=>70,//重点人员相似度报警，范围[1, 100)
+            "description"=>"测试识别计划",
+            "timeBlockList"=>[]
+        ];
+
+        $hk=new Haikang();
+        $result = $hk->doCurl($postData, $hk->black_addition);
+        $arr=json_decode($result,true);
         halt($arr);
     }
     /**

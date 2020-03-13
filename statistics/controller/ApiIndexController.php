@@ -5,6 +5,7 @@ use think\Db;
 use think\Request;
 use plugins\statistics\model\BaseModel as base;
 use plugins\statistics\model\PluginStatisticsDirModel;
+use GatewayClient\Gateway;
 /**
  * api控制器
  */
@@ -217,10 +218,10 @@ class ApiIndexController extends PluginRestBaseController
     /**
      * 接收事件-保存陌生人
      */
-    public function inStranger()
+    public function addStranger()
     {
         $param = input('');
-        file_put_contents('C:\WWW\js2\lhyd\public\plugins\statistics\controller\stranger.txt', serialize($param), FILE_APPEND);
+        file_put_contents('C:\WWW\js2\lhyd\public\plugins\statistics\log\stranger.txt', serialize($param), FILE_APPEND);
         $data = $param['params']['events']['data'];
         Db::name('statistics_face_stranger')->insert([
             'ageGroup' => $data['faceRecognitionResult']['snap']['ageGroup'],
@@ -238,10 +239,10 @@ class ApiIndexController extends PluginRestBaseController
     /**
      * 接收事件-保存重点人员
      */
-    public function inEmphasis()
+    public function addEmphasis()
     {
         $param = input('');
-        file_put_contents('C:\WWW\js2\lhyd\public\plugins\statistics\controller\emphasis.txt', serialize($param), FILE_APPEND);
+        file_put_contents('C:\WWW\js2\lhyd\public\plugins\statistics\log\emphasis.txt', serialize($param), FILE_APPEND);
         $data = $param['params']['events']['data'];
         Db::name('statistics_face_emphasis')->insert([
             'ageGroup' => $data['faceRecognitionResult']['snap']['ageGroup'],
@@ -265,11 +266,81 @@ class ApiIndexController extends PluginRestBaseController
         ]);
     }
     /**
+     * 接收事件-保存GPS
+     */
+    public function addGps(){
+        $param = input('');
+        file_put_contents('C:\WWW\js2\lhyd\public\plugins\statistics\log\gps.txt', serialize($param), FILE_APPEND);
+        $data = $param['params']['events']['data'];
+        Db::name('statistics_face_gps')->insert([
+            'dataType' => $data['dataType'],
+            'recvTime' => $data['recvTime'],
+            'sendTime' => $data['sendTime'],
+            'dateTime' => $data['dateTime'],
+            'ipAddress' => $data['ipAddress'],
+            'portNo' => $data['portNo'],
+            'channelID' => $data['channelID'],
+            'eventType' => $data['eventType'],
+            'eventDescription' => $data['eventDescription'],
+            'deviceIndexCode' => $data['gpsCollectione']['targetAttrs']['deviceIndexCode'],
+            'decodeTag' => $data['gpsCollectione']['targetAttrs']['decodeTag'],
+            'cameraIndexCode' => $data['gpsCollectione']['targetAttrs']['cameraIndexCode'],
+            'cameraType' => $data['gpsCollectione']['targetAttrs']['cameraType'],
+            'longitude' => $data['gpsCollectione']['longitude'],
+            'latitude' => $data['gpsCollectione']['latitude'],
+            'time' => $data['gpsCollectione']['time'],
+            'direction' => $data['gpsCollectione']['direction'],
+            'directionEW' => $data['gpsCollectione']['directionEW'],
+            'directionNS' => $data['gpsCollectione']['directionNS'],
+            'speed' => $data['gpsCollectione']['speed'],
+            'satellites' => $data['gpsCollectione']['satellites']
+        ]);
+    }
+    /**
+     * 接收事件-抓拍和比对
+     */
+    public function addFace(){
+        $param = input('');
+        file_put_contents('C:\WWW\js2\lhyd\public\plugins\statistics\log\face.txt', serialize($param), FILE_APPEND);
+    }
+    /**
      * 添加计划
      */
+    public function addEmphasisPlan()
+    {
+        $postData = [
+            "name"=> "重点人员测试计划",
+            "faceGroupIndexCodes"=>["f77b25c4-8a25-4d78-91a1-700320320449","5fd42a66-8e55-46fc-9f36-1ffb4f80558f"],//人脸分组
+            "recognitionResourceType"=> "FACE_RECOGNITION_SERVER",//资源类型
+            "recognitionResourceIndexCodes"=>[],//识别资源
+            "cameraIndexCodes"=>["54d7449b3e69444886ffb09e2e75ae69"],//抓拍点通道
+            "threshold"=>70,//重点人员相似度报警，范围[1, 100)
+            "description"=>"测试识别计划",
+            "timeBlockList"=>[]
+        ];
 
+        $hk=new Haikang();
+        $result = $hk->doCurl($postData, $hk->black_addition);
+        $arr=json_decode($result,true);
+        halt($arr);
+    }
     /**
-     * 地图选择目录
+     * 发送重点人员消息
+     */
+    public function sendEmphasis()
+    {
+        $txt=input('txt');
+//        halt($txt);
+            $msg = array(
+                'type'=>'all',
+                'content'=>$txt
+            );
+            Gateway::sendToAll(json_encode($msg));
+
+
+    }
+    /**
+     * demo地图选择目录
      */
     public function getMapSelectDir()
     {
@@ -279,6 +350,19 @@ class ApiIndexController extends PluginRestBaseController
         $list['regions']=Db::name('statistics_regions')->where($where)->order('id asc')->select()->toArray();
         $list['dir']=Db::name('statistics_dir')->select()->toArray();
         $list['cameras']=Db::name('statistics_cameras')->field('id,dir_id,cameraName,regionIndexCode')->select();
+        return zy_json_echo(true,'获取成功',$list,200);
+    }
+    /**
+     * 获取有拼音的地区
+     */
+    public function getAbbrArea()
+    {
+        $where['abbr'] = ['exp','!= ""'];
+        $list=Db::name('statistics_regions')
+            ->where($where)
+            ->field('id,name,longitude,latitude,abbr')
+            ->order('id asc')
+            ->select();
         return zy_json_echo(true,'获取成功',$list,200);
     }
 }
