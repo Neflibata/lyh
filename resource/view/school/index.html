@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <include file='public/head'>
+        <link rel="stylesheet" type="text/css" href="__PLUGIN_TMPL__/public/balabala/myVue.css"/>
+        <link rel="stylesheet" type="text/css" href="//at.alicdn.com/t/font_1067679_gkvty9ekkq.css"/>
+        <style>
+            table th, table td {
+                text-align: center;
+            }
+
+            .ml-10 {
+                margin-left: 10px;
+            }
+
+            .school_detil {
+                background-color: #F7F7F7
+            }
+
+            tr {
+                height: 60px;
+            }
+
+            [v-cloak] {
+                display: none
+            }
+        </style>
+        </head>
+
+<body>
+<div class="wrap js-check-wrap">
+    <php>$currentTab=2;</php>
+    <ul class="nav nav-tabs">
+        <include file="public@nav"/>
+    </ul>
+    <form class="well form-inline margin-top-20" method="get" action="{:cmf_plugin_url('Resource://school/index')}">
+        <select class="form-control" name="search_key">
+            <option value="1" <if condition="input('request.search_key/s')==1">selected</if>>ID</option>
+            <option value="2" <if condition="input('request.search_key/s')==2">selected</if>>地区</option>
+            <option value="3" <if condition="input('request.search_key/s')==3">selected</if>>监控点</option>
+        </select>
+        <input type="text" class="form-control" name="text" style="width: 180px;" value="{:input('request.text/s','')}" placeholder="请输入关键字">
+        <input type="submit" class="btn btn-primary" value="搜索"/>
+        <a class="btn btn-danger" href="{:cmf_plugin_url('Resource://school/index')}">清空</a>
+        <a href="javascript:;" class="btn btn-info" onclick="create()">创建</a>
+    </form>
+    <table class="table table-bordered table-hover" style="text-align:center;">
+        <thead>
+        <tr>
+            <th><input onclick="selectAll()" type="checkbox" name="controlAll" id="controlAll"></th>
+            <th class=".switch-off"></th>
+            <th>ID</th>
+            <th>地区</th>
+            <th>学校监控点</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <volist name="list" id="vo">
+            <tr data-tr="{$vo.id}">
+                <td><input class="checkboxes" type="checkbox" value="{$vo.id}" name="selected"></td>
+                <td><span
+                        style="color:green;cursor: pointer;display:inline-block;width:10px;position:relative; left:-6px"
+                        class="switch-btn iconfont icon-youjiantou" data-id="{$vo.id}"></span></td>
+                <td>{$vo.id}</td>
+                <td>{$vo.name}</td>
+                <td>{$vo.dirName}</td>
+                <td style="">
+                    <a href="javascript:" class="btn btn-xs btn-info" onclick="createCamer({$vo.id})">添加监控</a>
+                    <a href="javascript:" class="btn btn-xs btn-success" onclick="edit({$vo.id})">编辑</a>
+                    <a class="btn btn-xs btn-danger js-ajax-delete" href="{:cmf_plugin_url('Resource://school/deleteDir')}?id={$vo.id}" data-msg="确定删除此信息吗？"
+                       data-refresh="{:cmf_plugin_url('Resource://school/index')}">删除</a>
+                </td>
+            </tr>
+        </volist>
+        </tbody>
+    </table>
+    <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" name="category"
+            value="0" aria-haspopup="true" aria-expanded="false" onclick="deletearr()"> 批量删除</button>
+    <div class="pagination" style="display: flex; justify-content: center;align-items: center;">
+        {$page}
+    </div>
+</div>
+
+</body>
+
+<include file='public/scripts'/>
+<script src="__STATIC__/js/layer/layer.js"></script>
+<!--<link  rel="stylesheet" type="text/css" href="__PLUGIN_TMPL__/public/balabala/iconfont.css">-->
+
+<!-- 弹出层 -->
+<script type="text/javascript">
+    //批量删除
+    function deletearr(){
+        let url="{:cmf_plugin_url('Resource://school/deleteArr')}"
+        let arr=[]
+        var length = $("input[name=selected]").length;
+        for (var i=0;i<length;i++){
+            if($("input[name=selected]").eq(i).prop("checked")){
+                let json = $("input[name=selected]").eq(i).attr('value');
+                arr.push(json)
+            }
+        }
+        layer.confirm('确定删除选中项吗？', {
+            btn: ['确定','取消'] //按钮
+        }, function(){
+            if(arr.length==0){
+                layer.msg('请选择内容')
+                return false
+            }
+            sendajax({"arr":arr}, url);
+            return false
+        }, function(){
+
+        });
+        return false;
+    }
+    //选择全部
+    function selectAll(){
+        var checklist = document.getElementsByName ("selected");
+        if(document.getElementById("controlAll").checked)
+        {
+            for(var i=0;i<checklist.length;i++)
+            {
+                checklist[i].checked = 1;
+            }
+        }else{
+            for(var j=0;j<checklist.length;j++)
+            {
+                checklist[j].checked = 0;
+            }
+        }
+    }
+    function create(){
+        let url="{:cmf_plugin_url('Resource://school/insert')}";
+        layer.open({
+            type: 2,
+            title: "创建学校目录",
+            shadeClose: true,
+            shade: 0.4,
+            area: ['768px', '68%'],
+            scrollbar: false,
+            btn: ['确定', '关闭'],
+            content: ["{:cmf_plugin_url('Resource://school/create')}"],
+            yes:function(index, layero){
+                let body = layer.getChildFrame('body', index);
+                let data = body.find('#fm').serialize();
+                sendajax(data, url);
+            }
+        });
+    }
+    function edit(id){
+        let url="{:cmf_plugin_url('Resource://School/update')}";
+        layer.open({
+            type: 2,
+            title: "修改学校目录",
+            shadeClose: true,
+            shade: 0.4,
+            area: ['768px', '68%'],
+            scrollbar: false,
+            btn: ['保存', '关闭'],
+            content: ["{:cmf_plugin_url('Resource://School/edit')}?id="+id],
+            yes:function(index, layero){
+                let body = layer.getChildFrame('body', index);
+                let data = body.find('#fm').serialize();
+                sendajax(data, url);
+            }
+        });
+    }
+    function createCamer(id){
+        let url="{:cmf_plugin_url('Resource://School/insertCamer')}";
+        layer.open({
+            type: 2,
+            title: "添加监控",
+            shadeClose: true,
+            shade: 0.4,
+            area: ['768px', '68%'],
+            scrollbar: false,
+            btn: ['确定', '关闭'],
+            content: ["{:cmf_plugin_url('Resource://School/createCamer')}?id="+id],
+            yes:function(index, layero){
+                let body = layer.getChildFrame('body', index);
+                let data = body.find('#fm').serialize();
+                sendajax(data, url);
+            }
+        });
+    }
+    $(".switch-btn").click(function () {
+        let _this = this
+        let id = $(_this).data('id');
+        let isOpen = $(_this).is('.icon-youjiantou');
+        if (isOpen) {
+            $.ajax({
+                type: "POST",
+                dataType: 'JSON',
+                async: false,
+                url: '{:cmf_plugin_url(\'Resource://school/getCameras\')}',
+                data: {id: id},
+                success: function (data) {
+                    console.log(data)
+                    if (data.code) {
+                        data.data.map((v, k) => {
+                            $("tr[data-tr=" + id + "]").after('<tr data-td=' + id + ' class="school_detil"><td></td><td></td><td>' + v.id + '</td><td>' + v.name + '</td><td>' + v.cameraName + '</td><td><a href="javascript:" class="btn btn-xs btn-success" onclick="editCamer('+v.id+')">编辑</a>\n' +
+                                '                <a class="btn btn-xs btn-danger js-ajax-delete"  href="javascript:void(0);" onclick="deleteCamer('+v.id+')">删除</a></td></tr>');
+                        })
+                    }
+                },
+                error: function () {
+                    layer.msg('请检查网络');
+                }
+            });
+            $(this).removeClass('icon-youjiantou')
+            $(this).addClass('icon-zhankai1');
+        } else {
+            $("tr[data-td=" + id + "]").remove();
+            $(this).removeClass('icon-zhankai1');
+            $(this).addClass('icon-youjiantou');
+        }
+    });
+    function deleteCamer(id){
+        let url="{:cmf_plugin_url('Resource://School/deleteCamer')}";
+        layer.confirm('确定删除选中项吗？', {
+            btn: ['确定','取消'] //按钮
+        }, function(){
+            sendajax({"id":id}, url);
+            return false
+        }, function(){
+
+        });
+    }
+    function editCamer(id) {
+        let url="{:cmf_plugin_url('Resource://School/updateCamer')}";
+        layer.open({
+            type: 2,
+            title: "修改监控点",
+            shadeClose: true,
+            shade: 0.4,
+            area: ['768px', '68%'],
+            scrollbar: false,
+            btn: ['保存', '关闭'],
+            content: ["{:cmf_plugin_url('Resource://School/editCamer')}?id="+id],
+            yes:function(index, layero){
+                let body = layer.getChildFrame('body', index);
+                let data = body.find('#fm').serialize();
+                sendajax(data, url);
+            }
+        });
+    }
+</script>
+
+
+</body>
+</html>

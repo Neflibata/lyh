@@ -1,0 +1,43 @@
+<include file="public@head"/>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .td-head {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<form role="form" id="fm" class="form-horizontal"  enctype="multipart/form-data"  method="post" action="">
+<div style="padding:18px 20px 2px 20px ">
+    <input name="id" type="hidden" class="form-control" value="{$vo.id}"/>
+    <table class="table table-bordered table-hover" style="text-align:center;margin-bottom:0">
+        <tbody>
+        <td class="td-head">学校ID</td>
+        <td>
+            <input name="school_id" type="text" class="form-control" style="width: 100%;" disabled value="{$vo.id}"/>
+        </td>
+        </tr>
+        <td class="td-head">学校名称</td>
+        <td>
+            <input name="school_name" type="text" class="form-control" style="width: 100%;" disabled value="{$vo.dirName}"/>
+        </td>
+        </tr>
+        <td class="td-head">监控点名</td>
+        <td>
+            <input name="camera_name" type="text" class="form-control" style="width: 100%;" value="{$vo.cameraName}"/>
+        </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</form>
+</body>
+<include file="public@scripts"/>
+<script src="__STATIC__/js/wind.js"></script>
+<script>
+
+
+</script>
+</html>

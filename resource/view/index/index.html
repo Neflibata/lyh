@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <include file='public/head'>
+    <link rel="stylesheet" type="text/css" href="__PLUGIN_TMPL__/public/balabala/myVue.css"/>
+
+    <style>
+        table th, table td{text-align: center;}
+        .sorttd{
+            width: 86px;
+        }
+        [v-cloak]{
+            display: none
+        }
+    </style>
+</head>
+
+<body>
+<div class="wrap js-check-wrap">
+    <php>$currentTab=1;</php>
+    <ul class="nav nav-tabs">
+        <include file="public@nav"/>
+    </ul>
+<form class="well form-inline margin-top-20" method="get" action="{:cmf_plugin_url('Resource://index/index')}">
+    <select class="form-control" name="search_key">
+        <option value="1" <if condition="input('request.search_key/s')==1">selected</if>>ID</option>
+        <option value="2" <if condition="input('request.search_key/s')==2">selected</if>>地区</option>
+    </select>
+    <input type="text" class="form-control" name="text" style="width: 180px;" value="{:input('request.text/s','')}" placeholder="请输入关键字">
+   <input type="submit" class="btn btn-primary" value="搜索"/>
+    <a class="btn btn-danger" href="{:cmf_plugin_url('Resource://index/index')}">清空</a>
+    <a href="javascript:;" class="btn btn-info" onclick="create()">创建</a>
+</form>
+    <table class="table table-bordered table-hover" style="text-align:center;">
+        <thead>
+        <tr>
+            <th><input onclick="selectAll()" type="checkbox" name="controlAll" id="controlAll"></th>
+            <th>ID</th>
+            <th>排序</th>
+            <th>地区</th>
+            <th>上级地区</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <volist name="list" id="vo">
+            <td>
+                <input class="checkboxes" type="checkbox" value="{$vo.id}" name="selected">
+            </td>
+            <td>{$vo.id}</td>
+            <td align="center" class="sorttd"><input name="sort" type="text" class="form-control" style="width: 50px;height: 30px; text-align: center;margin-left: 9px" value="{$vo.sort}"/></td>
+            <td ><a href="{:cmf_plugin_url('Resource://school/index')}?search_key=2&text={$vo.name}">{$vo.name}</a></td>
+            <td><present name="vo.parent_name">{$vo.parent_name}</present></td>
+            <td style="">
+                <a href="javascript:" class="btn btn-xs btn-success " onclick="edit({$vo.id})">编辑</a>
+                <a class="btn btn-xs btn-danger js-ajax-delete"  href="{:cmf_plugin_url('Resource://index/delete')}?id={$vo.id}" data-msg="确定删除此条区域吗？"
+                   data-refresh="{:cmf_plugin_url('Resource://index/index')}">删除</a>
+            </td>
+            </tr>
+        </volist>
+        </tbody>
+    </table>
+    <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" name="category"
+            value="0" aria-haspopup="true" aria-expanded="false" onclick="sortarr()"> 批量排序</button>
+    <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" name="category"
+            value="0" aria-haspopup="true" aria-expanded="false" onclick="deletearr()"> 批量删除</button>
+    <button onclick="cc()">发送</button>
+</div>
+</body>
+<include file='public/scripts'/>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.21/dist/vue.js"></script>
+<script src="__STATIC__/js/layer/layer.js"></script>
+<script src="__STATIC__/js/custom/custom.js"></script>
+<script src="__PLUGIN_TMPL__/public/balabala/myVue.js"></script>
+<script src="__PLUGIN_TMPL__/public/balabala/ajax.js"></script>
+<link  rel="stylesheet" type="text/css" href="__PLUGIN_TMPL__/public/balabala/iconfont.css">
+
+<script type="text/javascript">
+        ws = new WebSocket("ws://192.168.0.40:7272");
+        // 服务端主动推送消息时会触发这里的onmessage
+        ws.onmessage = function(e){
+            // json数据转换成js对象
+            let data = eval("("+e.data+")");
+            let type = data.type || '';
+            console.log(data)
+            switch(type){
+                case 'init':
+                    console.log('aa')
+                    break;
+                default :
+                    layer.msg(e.data);
+            }
+        };
+        // let t2 = window.setInterval(function() {
+        //     ws.send("发送数据")
+        // },7000)
+    //批量排序
+    function sortarr(){
+        let url="{:cmf_plugin_url('Resource://index/sortArr')}"
+        let arr={}
+        var length = $("input[name=selected]").length;
+        for (var i=0;i<length;i++){
+            let id = $("input[name=selected]").eq(i).attr('value');
+            let sort = $("input[name=sort]").eq(i).val();
+            let idjson={'id':id,'sort':sort}
+            arr[i]=idjson
+        }
+        layer.confirm('确定重新排序吗？', {
+            btn: ['确定','取消'] //按钮
+        }, function(){
+            sendajax({"arr":arr}, url);
+            return false
+        }, function(){
+
+        });
+        return false;
+    }
+    //批量删除
+    function deletearr(){
+        let url="{:cmf_plugin_url('Resource://index/deleteArr')}"
+        let arr=[]
+        var length = $("input[name=selected]").length;
+        for (var i=0;i<length;i++){
+            if($("input[name=selected]").eq(i).prop("checked")){
+                let json = $("input[name=selected]").eq(i).attr('value');
+                arr.push(json)
+            }
+        }
+        layer.confirm('确定删除选中项吗？', {
+            btn: ['确定','取消'] //按钮
+        }, function(){
+            if(arr.length==0){
+                layer.msg('请选择内容')
+                return false
+            }
+            sendajax({"arr":arr}, url);
+            return false
+        }, function(){
+
+        });
+        return false;
+    }
+    //选择全部
+    function selectAll(){
+        var checklist = document.getElementsByName ("selected");
+        if(document.getElementById("controlAll").checked)
+        {
+            for(var i=0;i<checklist.length;i++)
+            {
+                checklist[i].checked = 1;
+            }
+        }else{
+            for(var j=0;j<checklist.length;j++)
+            {
+                checklist[j].checked = 0;
+            }
+        }
+    }
+    function edit(id){
+        let url="{:cmf_plugin_url('Resource://index/update')}";
+        layer.open({
+            type: 2,
+            title: "修改地区",
+            shadeClose: true,
+            shade: 0.4,
+            area: ['768px', '68%'],
+            scrollbar: false,
+            btn: ['保存', '关闭'],
+            content: ["{:cmf_plugin_url('Resource://Index/edit')}?id="+id],
+            yes:function(index, layero){
+                let body = layer.getChildFrame('body', index);
+                let data = body.find('#fm').serialize();
+                sendajax(data, url);
+            }
+        });
+    }
+    function create(){
+        let url="{:cmf_plugin_url('Resource://index/insert')}";
+        layer.open({
+            type: 2,
+            title: "创建地区",
+            shadeClose: true,
+            shade: 0.4,
+            area: ['768px', '68%'],
+            scrollbar: false,
+            btn: ['确定', '关闭'],
+            content: ["{:cmf_plugin_url('Resource://Index/create')}"],
+            yes:function(index, layero){
+                let body = layer.getChildFrame('body', index);
+                let data = body.find('#fm').serialize();
+                sendajax(data, url);
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

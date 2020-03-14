@@ -4,7 +4,8 @@ use cmf\controller\PluginRestBaseController;//引用插件基类
 use think\Db;
 use think\Request;
 use plugins\statistics\model\BaseModel as base;
-
+use plugins\statistics\model\PluginStatisticsDirModel;
+use GatewayClient\Gateway;
 /**
  * api控制器
  */
@@ -29,7 +30,9 @@ class ApiIndexController extends PluginRestBaseController
     {
 
     }
-
+    /**
+     *  提交人员资料
+     */
     public function upData()
     {
 
@@ -115,6 +118,7 @@ class ApiIndexController extends PluginRestBaseController
                 else
                     $member_upload_info->update(["add_num"=>["+=", 1]], ["MUIID"=>["=", $info["MUIID"]]]);
             }
+
         }
         else
             return [false, $retData["msg"]];
@@ -154,5 +158,210 @@ class ApiIndexController extends PluginRestBaseController
             }
         }
     }
+    /**
+     * 地图左侧菜单3级
+     */
+    public function getRegionCatalog()
+    {
+        $where=[];
+        $where['parentIndexCode']=['eq','root000000'];
+        $where['name']=['notlike','%FD%'];//菜单不要第一级
+        $regions=Db::name('statistics_regions')->where($where)->field('*,name as label')->order('id asc')->select()->toArray();
+        $dir=Db::name('statistics_dir')->field('*,dirName as label')->select()->toArray();
+        $cameras=Db::name('statistics_cameras')->field('*,cameraName as label')->select()->toArray();
+        foreach ($regions as $k=>$v){
+            $code=0;
+            foreach ($dir as $ke=>$val){
+                if($v['indexCode']==$val['cameraIndexCode']){
+                    $regions[$k]['children'][$code]=$val;
+                    foreach ($cameras as $key=>$value){
+                        if($value['dir_id']==$val['id']){
+                            $regions[$k]['children'][$code]['children'][]=$value;
+                            $code++;
+                        }
+                    }
+                }
+            }
+        }
+        return zy_json_echo(true,'获取成功',$regions,200);
+    }
+    /**
+     * 地图左侧菜单2级
+     */
+    public function getSchoolDir()
+    {
+        $where=[];
+        $where['parentIndexCode']=['eq','root000000'];
+        $where['name']=['notlike','%FD%'];//菜单不要第一级
+        $regions=Db::name('statistics_regions')->where($where)->field('*,name as label')->order('id asc')->select()->toArray();
+        $dir=Db::name('statistics_dir')->field('*,dirName as label')->select()->toArray();
+        foreach ($regions as $k=>$v){
+            foreach ($dir as $ke=>$val){
+                if($v['indexCode']==$val['cameraIndexCode']){
+                    $regions[$k]['children'][]=$val;
+                }
+            }
+        }
+        return zy_json_echo(true,'获取成功',$regions,200);
+    }
+    /**
+     * 学校目录id获取摄像点
+     */
+    public function getCameras($id=null)
+    {
+        if(empty($id)){
+            return zy_json_echo(false,'参数错误','',-1);
+        }
+        $list=Db::name('statistics_cameras')->where('dir_id',$id)->select();
+        return zy_json_echo(true,'获取成功',$list,200);
+    }
+    /**
+     * 接收事件-保存陌生人
+     */
+    public function addStranger()
+    {
+        $param = input('');
+        file_put_contents('C:\WWW\js2\lhyd\public\plugins\statistics\log\stranger.txt', serialize($param), FILE_APPEND);
+        $data = $param['params']['events']['data'];
+        Db::name('statistics_face_stranger')->insert([
+            'ageGroup' => $data['faceRecognitionResult']['snap']['ageGroup'],
+            'gender' => $data['faceRecognitionResult']['snap']['gender'],
+            'glass' => $data['faceRecognitionResult']['snap']['glass'],
+            'bkgUrl' => $data['faceRecognitionResult']['snap']['bkgUrl'],
+            'faceUrl' => $data['faceRecognitionResult']['snap']['faceUrl'],
+            'faceTime' => $data['faceRecognitionResult']['snap']['faceTime'],
+            'srcEventId' => $data['srcEventId'],
+            'resourceType' => $data['resInfo']['resourceType'],
+            'indexCode' => $data['resInfo']['indexCode'],
+            'cn' => $data['resInfo']['cn']
+        ]);
+    }
+    /**
+     * 接收事件-保存重点人员
+     */
+    public function addEmphasis()
+    {
+        $param = input('');
+        file_put_contents('C:\WWW\js2\lhyd\public\plugins\statistics\log\emphasis.txt', serialize($param), FILE_APPEND);
+        $data = $param['params']['events']['data'];
+        Db::name('statistics_face_emphasis')->insert([
+            'ageGroup' => $data['faceRecognitionResult']['snap']['ageGroup'],
+            'gender' => $data['faceRecognitionResult']['snap']['gender'],
+            'glass' => $data['faceRecognitionResult']['snap']['glass'],
+            'bkgUrl' => $data['faceRecognitionResult']['snap']['bkgUrl'],
+            'faceUrl' => $data['faceRecognitionResult']['snap']['faceUrl'],
+            'faceTime' => $data['faceRecognitionResult']['snap']['faceTime'],
+            'faceGroupCode' => $data['faceRecognitionResult']['faceMatch']['faceGroupCode'],
+            'faceGroupName' => $data['faceRecognitionResult']['faceMatch']['faceGroupName'],
+            'faceInfoCode' => $data['faceRecognitionResult']['faceMatch']['faceInfoCode'],
+            'faceInfoName' => $data['faceRecognitionResult']['faceMatch']['faceInfoName'],
+            'faceInfoSex' => $data['faceRecognitionResult']['faceMatch']['faceInfoSex'],
+            'certificate' => $data['faceRecognitionResult']['faceMatch']['certificate'],
+            'similarity' => $data['faceRecognitionResult']['faceMatch']['similarity'],
+            'facePicUrl' => $data['faceRecognitionResult']['faceMatch']['facePicUrl'],
+            'srcEventId' => $data['srcEventId'],
+            'resourceType' => $data['resInfo']['resourceType'],
+            'indexCode' => $data['resInfo']['indexCode'],
+            'cn' => $data['resInfo']['cn']
+        ]);
+    }
+    /**
+     * 接收事件-保存GPS
+     */
+    public function addGps(){
+        $param = input('');
+        file_put_contents('C:\WWW\js2\lhyd\public\plugins\statistics\log\gps.txt', serialize($param), FILE_APPEND);
+        $data = $param['params']['events']['data'];
+        Db::name('statistics_face_gps')->insert([
+            'dataType' => $data['dataType'],
+            'recvTime' => $data['recvTime'],
+            'sendTime' => $data['sendTime'],
+            'dateTime' => $data['dateTime'],
+            'ipAddress' => $data['ipAddress'],
+            'portNo' => $data['portNo'],
+            'channelID' => $data['channelID'],
+            'eventType' => $data['eventType'],
+            'eventDescription' => $data['eventDescription'],
+            'deviceIndexCode' => $data['gpsCollectione']['targetAttrs']['deviceIndexCode'],
+            'decodeTag' => $data['gpsCollectione']['targetAttrs']['decodeTag'],
+            'cameraIndexCode' => $data['gpsCollectione']['targetAttrs']['cameraIndexCode'],
+            'cameraType' => $data['gpsCollectione']['targetAttrs']['cameraType'],
+            'longitude' => $data['gpsCollectione']['longitude'],
+            'latitude' => $data['gpsCollectione']['latitude'],
+            'time' => $data['gpsCollectione']['time'],
+            'direction' => $data['gpsCollectione']['direction'],
+            'directionEW' => $data['gpsCollectione']['directionEW'],
+            'directionNS' => $data['gpsCollectione']['directionNS'],
+            'speed' => $data['gpsCollectione']['speed'],
+            'satellites' => $data['gpsCollectione']['satellites']
+        ]);
+    }
+    /**
+     * 接收事件-抓拍和比对
+     */
+    public function addFace(){
+        $param = input('');
+        file_put_contents('C:\WWW\js2\lhyd\public\plugins\statistics\log\face.txt', serialize($param), FILE_APPEND);
+    }
+    /**
+     * 添加计划
+     */
+    public function addEmphasisPlan()
+    {
+        $postData = [
+            "name"=> "重点人员测试计划",
+            "faceGroupIndexCodes"=>["f77b25c4-8a25-4d78-91a1-700320320449","5fd42a66-8e55-46fc-9f36-1ffb4f80558f"],//人脸分组
+            "recognitionResourceType"=> "FACE_RECOGNITION_SERVER",//资源类型
+            "recognitionResourceIndexCodes"=>[],//识别资源
+            "cameraIndexCodes"=>["54d7449b3e69444886ffb09e2e75ae69"],//抓拍点通道
+            "threshold"=>70,//重点人员相似度报警，范围[1, 100)
+            "description"=>"测试识别计划",
+            "timeBlockList"=>[]
+        ];
 
+        $hk=new Haikang();
+        $result = $hk->doCurl($postData, $hk->black_addition);
+        $arr=json_decode($result,true);
+        halt($arr);
+    }
+    /**
+     * 发送重点人员消息
+     */
+    public function sendEmphasis()
+    {
+        $txt=input('txt');
+            $msg = array(
+                'type'=>'all',
+                'content'=>$txt
+            );
+            Gateway::sendToAll(json_encode($msg));
+
+
+    }
+    /**
+     * demo地图选择目录
+     */
+    public function getMapSelectDir()
+    {
+        $where=[];
+        $where['parentIndexCode']=['eq','root000000'];
+        $where['name']=['notlike','%FD%'];
+        $list['regions']=Db::name('statistics_regions')->where($where)->order('id asc')->select()->toArray();
+        $list['dir']=Db::name('statistics_dir')->select()->toArray();
+        $list['cameras']=Db::name('statistics_cameras')->field('id,dir_id,cameraName,regionIndexCode')->select();
+        return zy_json_echo(true,'获取成功',$list,200);
+    }
+    /**
+     * 获取有拼音的地区
+     */
+    public function getAbbrArea()
+    {
+        $where['abbr'] = ['exp','!= ""'];
+        $list=Db::name('statistics_regions')
+            ->where($where)
+            ->field('id,name,longitude,latitude,abbr')
+            ->order('id asc')
+            ->select();
+        return zy_json_echo(true,'获取成功',$list,200);
+    }
 }

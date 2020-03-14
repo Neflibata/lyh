@@ -1,1 +1,14 @@
-{}
+{
+  "age":{
+    "UNKNOWN": "未知",
+    "CHILD": "少年",
+    "YOUNG": "青年",
+    "MIDDLE": "中年",
+    "OLD": "老年",
+    "INFANT": "婴幼儿",
+    "KID": "儿童",
+    "TEENAGER": "青少年",
+    "PRIME": "壮年",
+    "MIDDLEAGED": "中老年"
+  }
+}

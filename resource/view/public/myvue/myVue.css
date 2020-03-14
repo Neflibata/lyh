@@ -1,0 +1,60 @@
+/*换页的css*/
+.page{
+	text-align: right;
+}
+.page div{
+	display: inline-block;
+	text-align: right;
+	border-radius: 5px;
+	padding: 0;
+	display: inline-block;
+	list-style: none;
+	border: 1px solid #ddd;
+	color: #337ab7;
+}
+.page span{
+	display: inline-block;
+	line-height: 35px;
+	padding: 0 15px;
+	border-left: 1px solid #ddd;
+	cursor:pointer;
+}
+.page span:first-of-type{
+	border-style: none;
+	cursor:pointer;
+}
+.page-on{
+	background-color: #337ab7;
+	color: #fff;
+
+}
+/*暂时没用*/
+.drawerbox{
+	position: absolute;
+	left: -25px;
+	top: 0;
+	width: 500px;
+	height: 100%;
+	display: flex;
+	display: -webkit-flex;
+	align-items: center;
+	transition: all 1s;
+	z-index: 99
+}
+.drawerbox.on{left: -100%}
+.drawerbox.on .left>.iconfont{transform: rotate(180deg)}
+.drawerbox .left>.iconfont{transition: all .3s}
+.drawerbox .left{
+	width: 25px;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: #fff9e6;
+	cursor:pointer;
+}
+.drawerbox .right{
+	width: calc(100% - 25px);
+	height: 100%;
+}
+
