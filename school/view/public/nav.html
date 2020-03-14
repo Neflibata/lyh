@@ -1,0 +1,6 @@
+
+<!-- 导航菜单 选项卡菜单-->
+<!-- 页面定义 currentTab   li 加上判断 -->
+<if condition="cmf_auth_check(cmf_get_current_admin_id(),'plugin/SubAppmarket/AdminIndex/index')">
+	<li <?php if( $currentTab == 1 ) echo 'class="active"';?> ><a href="javascript:;">应用市场</a></li>
+</if>

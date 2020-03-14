@@ -1,0 +1,64 @@
+<script src="__STATIC__/js/jquery.js"></script>
+<script src="__STATIC__/js/wind.js"></script>
+<script src="__STATIC__/js/bootstrap.min.js"></script>
+<script src="__STATIC__/js/admin.js"></script>
+
+<script src="__PLUGIN_TMPL__/public/assets/process/js/ystep.js"></script>
+<script type="text/javascript">
+	$("#moduleDevolopProcess").loadStep({
+		size: "large",
+		color: "blue",
+		steps: [{
+			title: "创建",
+			content: "键入模块基本信息"
+		},{
+			title: "审核",
+			content: "审核模块基本信息"
+		},{
+			title: "完善",
+			content: "补充模块信息"
+		},{
+			title: "审核",
+			content: "审核模块所有信息"
+		},{
+			title: "完成",
+			content: "模块开发完成"
+		}]
+	});
+
+	var step = parseInt ('{$module.step|default=0}');
+	var status = parseInt('{$module.status|default=0}');
+	var num = 0 ;
+	if( step == 1 ){
+		switch( status ){
+			case '1':
+			case '2':
+				num = 2;
+			break;
+			default:
+				num = 0;
+			break;
+		}
+	}else if( step == 2 ){
+		switch( status ){
+			case '1':
+				num =  4;
+				break;
+			case '2':
+				num = 4;
+			break;
+			case '3':
+				num = 3;
+			break;
+			case '4':
+				num = 5;
+			break;
+			default:
+				num = 0;
+			break;
+		}
+	}else{
+		num = 0;
+	}
+	$("#moduleDevolopProcess").setStep( num );
+</script>
