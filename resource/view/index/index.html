@@ -65,6 +65,7 @@
             value="0" aria-haspopup="true" aria-expanded="false" onclick="sortarr()"> 批量排序</button>
     <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" name="category"
             value="0" aria-haspopup="true" aria-expanded="false" onclick="deletearr()"> 批量删除</button>
+    <button onclick="cc()">发送</button>
 </div>
 </body>
 <include file='public/scripts'/>
@@ -75,8 +76,25 @@
 <script src="__PLUGIN_TMPL__/public/balabala/ajax.js"></script>
 <link  rel="stylesheet" type="text/css" href="__PLUGIN_TMPL__/public/balabala/iconfont.css">
 
-<!-- 弹出层 -->
 <script type="text/javascript">
+        ws = new WebSocket("ws://192.168.0.40:7272");
+        // 服务端主动推送消息时会触发这里的onmessage
+        ws.onmessage = function(e){
+            // json数据转换成js对象
+            let data = eval("("+e.data+")");
+            let type = data.type || '';
+            console.log(data)
+            switch(type){
+                case 'init':
+                    console.log('aa')
+                    break;
+                default :
+                    layer.msg(e.data);
+            }
+        };
+        // let t2 = window.setInterval(function() {
+        //     ws.send("发送数据")
+        // },7000)
     //批量排序
     function sortarr(){
         let url="{:cmf_plugin_url('Resource://index/sortArr')}"

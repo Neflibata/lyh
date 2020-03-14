@@ -330,7 +330,6 @@ class ApiIndexController extends PluginRestBaseController
     public function sendEmphasis()
     {
         $txt=input('txt');
-//        halt($txt);
             $msg = array(
                 'type'=>'all',
                 'content'=>$txt
