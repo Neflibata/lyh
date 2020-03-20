@@ -50,6 +50,9 @@ class ApiIndexController extends PluginRestBaseController
         $result['last_login_time'] = time();
         Db::name('user')->update($result);
         $result = Db::name('user')->field('id,user_type,user_login')->where($where)->find();
+        $result1 = zy_userid_jwt($result['id'])['data']['uid'];
+        $result['id'] = $result1;
+        $result['user_type'] = base64_encode($result['user_type']);
         return zy_array(true,'查询成功',$result,200,false);
     }
 
@@ -59,6 +62,7 @@ class ApiIndexController extends PluginRestBaseController
      */
     public function wgy_index(){
         $param = $this->request->param();
+        $param = zy_decodeData($param,false);
         if(empty($param['uid'])){
             return zy_array(false,'请传入用户id(uid)','',300,false);
         }
@@ -110,11 +114,13 @@ class ApiIndexController extends PluginRestBaseController
     public function index()
     {
         $param = $this->request->param();
+        $param['uid'] = $param['user_id'];
+        $param = zy_decodeData($param,false);
         $paginate=empty($param['paginate'])?10:$param['paginate'];
-        if(empty($param['user_id'])){
+        if(empty($param['uid'])){
             return zy_array(false,'请传入用户id(user_id)','',300,false);
         }
-        $user_id = $param['user_id'];
+        $user_id = $param['uid'];
         $userInfo = Db::name('user')->where('id='.$user_id)->find();
         if($userInfo['user_type']!=3){
             return zy_array(false,'该用户类型不能查看学校列表','',300,false);
@@ -138,7 +144,7 @@ class ApiIndexController extends PluginRestBaseController
     public function school_detail()
     {
         $param = $this->request->param();
-
+        $param = zy_decodeData($param,false);
         $uid = $param['uid'];
         if(empty($uid)){
             return zy_array(false,'请传入uid','',300,false);
@@ -164,16 +170,18 @@ class ApiIndexController extends PluginRestBaseController
     public function school_edit()
     {
         $param = $this->request->param();
+        $param['uid'] = $param['user_id'];
+        $param = zy_decodeData($param,false);
         $id = $param['id'];
         $company = $param['company'];
         $personCharge = $param['personCharge'];
         $personChargePhone = $param['personChargePhone'];
         $street = $param['street'];
         $meals = $param['meals'];
-        if(empty($param['user_id'])){
+        if(empty($param['uid'])){
             return zy_array(false,'请传入用户id(user_id)','',300,false);
         }
-        $user_id = $param['user_id'];
+        $user_id = $param['uid'];
         $userInfo = Db::name('user')->where('id='.$user_id)->find();
         $schoolArr = explode(",",$userInfo['school']);
         if(!in_array($id,$schoolArr)){
@@ -247,6 +255,8 @@ class ApiIndexController extends PluginRestBaseController
      */
     public function report_school(){
         $param = $this->request->param();
+        $param['uid'] = $param['user_id'];
+        $param = zy_decodeData($param,false);
 
         $id = $param['id'];//学校id
         $name = $param['dirName'];//学校名称
@@ -257,9 +267,9 @@ class ApiIndexController extends PluginRestBaseController
         $personCharge = $param['personCharge'];//负责人
         $personChargePhone = $param['personChargePhone'];//负责人联系方式
         $street = $param['street'];//学校地址
-        $user_id = $param['user_id'];//用户id
+        $user_id = $param['uid'];//用户id
 
-        if(empty($param['user_id'])){
+        if(empty($param['uid'])){
             return zy_array(false,'请传入用户id(user_id)','',300,false);
         }
         if(empty($id) || empty($name) || empty($company) || empty($violation) || empty($title) || empty($content) || empty($personCharge)
@@ -345,6 +355,7 @@ class ApiIndexController extends PluginRestBaseController
      */
     public function add_health_person(){
         $data = $this->request->post();
+        $data = zy_decodeData($data,false);
         $neadArg = ["nickname"=>[true, 0, "请填写姓名"], "mobile"=>[true, 1, "请填写手机号"], "face_thumb"=>[true, 0, "请上传人脸照片"],
             "health_card"=>[true, 0, "请上传健康证照片"] , "health_endtime"=>[true, 0, "请填写健康证到期时间"], "member_type"=>[true, 0, "请填写人员类别"],"health_id_card"=>[true, 1, "请输入健康证号"],
             "id_card"=>[true, 1,"请输入身份证号"]];
@@ -372,9 +383,9 @@ class ApiIndexController extends PluginRestBaseController
 
         $thumb_name = $company ."_". $dataInfo["nickname"];
 
-//        $retData = $this->uploadDistant($company, $thumb_name, $this->hrefPath.$dataInfo["face_thumb"], $id_card, $upOrIn);
-////        if($retData[0])
-////        {
+        $retData = $this->uploadDistant($company, $thumb_name, $this->hrefPath.$dataInfo["face_thumb"], $id_card, $upOrIn);
+        if($retData[0])
+        {
             $face_before = preg_replace("/[0-9|A-Z|a-z]+\./", "人脸_".$thumb_name.".", $dataInfo["face_thumb"]);
             $health_before = preg_replace("/[0-9|A-Z|a-z]+\./", "健康证_".$thumb_name.".", $dataInfo["health_card"]);
             if(empty($face_before) || empty($health_before))
@@ -391,11 +402,11 @@ class ApiIndexController extends PluginRestBaseController
             else
                 $model->update($dataInfo, ["id_card"=>["=", $id_card]]);
             return zy_array(true,'添加成功',$dataInfo,200,false);
-//        }
-//        else
-//        {
-//            return zy_array(false,'添加失败',$dataInfo,300,false);
-//        }
+        }
+        else
+        {
+            return zy_array(false,'添加失败',$dataInfo,300,false);
+        }
     }
 
     private function uploadDistant($company, $thumb_name, $imgUrl, $id_card, $upOrIn = false){
@@ -458,6 +469,7 @@ class ApiIndexController extends PluginRestBaseController
     public function health_list()
     {
         $param = $this->request->param();
+        $param = zy_decodeData($param,false);
         $paginate=empty($param['paginate'])?10:$param['paginate'];
         if(empty($param['uid'])){
             return zy_array(false,'请传入用户id(user_id)','',300,false);
@@ -541,6 +553,7 @@ class ApiIndexController extends PluginRestBaseController
     public function report_school_list()
     {
         $param = $this->request->param();
+        $param = zy_decodeData($param,false);
         $paginate=empty($param['paginate'])?10:$param['paginate'];
         $uid = $param['uid'];
         if(empty($uid)){
