@@ -254,4 +254,88 @@ class BaseModel
         $count = $moreTableDB->query($sql); //获取上一条sql语句查询了多少条数据
         return [$retData, array_shift($count)["found_rows()"]];
     }
+
+    /**
+     * 当月健康证
+     * int all_num所有健康证数量
+     * int nor_num未过期的数量
+     * int nor_ratio未过期比例 0-100
+     */
+    public static function month_health($dir_id=null)
+    {
+        if(empty($dir_id)){
+            return zy_json_echo(false,'当月健康证:dir_id不能为空','',-1);
+        }
+        $result['all_num']=Db::name('member_info')->where('school_id',$dir_id)->count();
+        $result['nor_num']=Db::name('member_info')->where('school_id',$dir_id)->where('health_endtime','>= time',date("Y-m-d",time()))->count();
+        if($result['nor_num']==0){
+            $result['nor_ratio']=0;
+        }else{
+            $result['nor_ratio']=ceil($result['nor_num']/$result['all_num']*100);
+        }
+        return $result;
+    }
+    /**
+     * 上月健康证
+     * int last_all_num所有健康证数量
+     * int last_nor_num未过期的数量
+     * int last_nor_ratio未过期比例 0-100
+     */
+    public static function last_month_health($dir_id=null)
+    {
+        if(empty($dir_id)){
+            return zy_json_echo(false,'上月健康证:dir_id不能为空','',-1);
+        }
+        $result['last_all_num']=Db::name('member_info')->where('school_id',$dir_id)->count();
+        $result['last_nor_num']=Db::name('member_info')->where('school_id',$dir_id)->where('health_endtime','>= time',date("Y-m-d",time()))->count();
+        $result['last_all_num']=Db::name('member_info')
+            ->where('school_id',$dir_id)
+            ->whereTime('addtime', '<=', date('Y-m-t', strtotime('-1 month')))
+            ->count();
+        $result['last_nor_num']=Db::name('member_info')
+            ->where('school_id',$dir_id)
+            ->where('health_endtime','>= time',date('Y-m-t', strtotime('-1 month')))
+            ->whereTime('addtime', '<=', date('Y-m-t', strtotime('-1 month')))
+            ->count();
+        if($result['last_nor_num']==0){
+            $result['last_ratio']=0;
+        }else{
+            $result['last_ratio']=ceil($result['last_nor_num']/$result['last_all_num']*100);
+        }
+        return $result;
+    }
+    /**
+     * 当月人脸抓拍
+     * int face_num上月抓拍人脸数量
+     * int dis_num上月处理人脸数量
+     * int dis_pro及时处理率 0-100
+     */
+    public static function month_face($dir_id=null)
+    {
+        if(empty($dir_id)){
+            return zy_json_echo(false,'当月人脸抓拍:dir_id不能为空','',-1);
+        }
+        $stat=Db::name('statistics_dir_stat')->where('month_section',date('Y-m', time()))->where('dir_id',$dir_id)->find();
+        $result['face_num']=$stat['stranger_face_num']+$stat['emphasis_face_num'];
+        $result['dis_num']=$stat['dis_stranger']+$stat['dis_emphasis'];
+        $result['dis_pro']= $result['dis_num']<1?0:ceil($result['dis_num']/$result['face_num']*100);
+        return $result;
+    }
+    /**
+     * 上月人脸抓拍
+     * int face_num上月抓拍人脸数量
+     * int dis_num上月处理人脸数量
+     * int dis_pro及时处理率 0-100
+     */
+    public static function last_month_face($dir_id=null)
+    {
+        if(empty($dir_id)){
+            return zy_json_echo(false,'上月人脸抓拍:dir_id不能为空','',-1);
+        }
+        $stat=Db::name('statistics_dir_stat')->where('month_section',date('Y-m', strtotime('-1 month')))->where('dir_id',$dir_id)->find();
+        $result['last_face_num']=$stat['stranger_face_num']+$stat['emphasis_face_num'];
+        $result['last_dis_num']=$stat['dis_stranger']+$stat['dis_emphasis'];
+        $result['last_dis_pro']= $result['last_dis_num']<1?0:ceil($result['last_dis_num']/$result['last_face_num']*100);
+        return $result;
+    }
 }
