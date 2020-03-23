@@ -17,6 +17,7 @@ class Haikang
     public $content_type="application/json";//类型
     public $accept="*/*" ;//accept
 
+    public $group_search_url = "/artemis/api/frs/v1/face/group";//搜索分组
     public $face_list_url = "/artemis/api/frs/v1/face/single/addition";//添加人脸照片
     public $upload_face_list_url = "/artemis/api/frs/v1/face/single/update";//修改人脸人脸照片
     public $api_face="/artemis/api/frs/v1/face";//查询人脸
