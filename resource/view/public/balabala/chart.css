@@ -1,0 +1,308 @@
+*{box-sizing: border-box;}
+.div-flex{
+    display: flex;
+    display: -webkit-flex;
+    align-items: center;
+}
+.div-flex > .flex{
+    overflow: hidden;
+    display: flex;
+    display: -webkit-flex;
+    align-items: center;
+    /*width: calc(100% / 5 - 20px);*/
+    margin-right: 20px;
+    border-radius: 6px;
+    /*box-shadow: 0 2px 2px rgba(204,197,185,.5);*/
+    background-color: #fff;
+    color: #252422;
+}
+/*.div-flex > .flex:nth-child(5n+0){margin-right: 0}*/
+.div-flex > .flex .iconfont{
+    font-size: 40px;
+    width: 100px;
+    line-height: 100px;
+    text-align: center;
+    color: #fff;
+}
+/*.div-flex > .flex:nth-child(1) .iconfont{background-color: #f3bb45}*/
+/*.div-flex > .flex:nth-child(2) .iconfont{background-color: #7ac29a}*/
+/*.div-flex > .flex:nth-child(3) .iconfont{background-color: #eb5e28}*/
+/*.div-flex > .flex:nth-child(4) .iconfont{background-color: #68b3c8}*/
+/*.div-flex > .flex:nth-child(5) .iconfont{background-color: #68b3c8}*/
+.div-flex > .flex .text{
+    text-align: center;
+    flex: 1;
+    padding:0 10px;
+}
+.div-flex > .flex .text p{
+    font-size: 15px;
+    margin: 0;
+    color:#666;
+    padding-bottom: 10px;
+}
+.div-flex > .flex .text h3{
+    font-size: 18px;
+    margin: 0;
+}
+.div-flex > .flex .text h3 span{
+    font-size: 50px;
+    font-weight: bold;
+}
+.border_shadow{
+    border-radius: 6px;
+    /*box-shadow: 0 2px 2px rgba(204,197,185,.5);*/
+    box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+    background: white;
+    padding:15px;
+    height: 100%;
+    width:100%;
+    padding-left:15px;
+}
+
+/*模板的css*/
+/*小模板*/
+.fr .rowBox{
+    width: 280px;
+    height: 180px;
+    margin: 2% 0;
+    display: inline-block;
+    box-sizing: border-box;
+}
+/*大模板*/
+.fl .rowBox{
+    width: 100%;
+    height: 100%;
+    display: inline-block;
+    box-sizing: border-box;
+}
+.rowBox .ivu-row{
+    margin-bottom: 2%;
+    box-sizing: border-box;
+}
+.fr .ivu-col{
+    background-color:#c9d6df;
+    border-radius: 6px;
+    box-shadow: 2px 2px 2px rgba(204,197,185,1);
+    height: 100%;
+    position: relative;
+}
+.fl .ivu-col{
+    height: 100%;
+    position: relative;
+}
+.fl .swiper-container{
+    height: 100%;
+    padding: 1px;
+}
+.fl .col-height,.secondConfig .col-height{
+    background-color:#c9d6df;
+    border-radius: 6px;
+    box-shadow: 2px 2px 2px rgba(204,197,185,1);
+    height: 100%;
+    position: relative;
+}
+/*左边栏目*/
+.fl{
+    float: left;
+    padding: 1%;
+    box-sizing: border-box;
+    width: 70vw;
+    height: 80vh;
+}
+/*右边栏目*/
+.fr{
+    width: 25%;
+    overflow-y:auto;
+    float: right;
+    height: 80vh;
+    border-left: 1px solid #bbb;
+    padding: 1%;
+    box-sizing: border-box;
+}
+.secondConfig{
+    width: 70vw;
+    height: 80vh;
+    padding: 2vh;
+    display: block;
+    margin: 0 auto;
+}
+.secondConfig .swiper-container{
+    height: 100%;
+}
+/*.secondConfig .col-height,.secondConfig .ivu-col>div{*/
+/*    background-color:#c9d6df;*/
+/*    border-radius: 6px;*/
+/*    box-shadow: 2px 2px 2px rgba(204,197,185,1);*/
+/*    height: 100%;*/
+/*    position: relative;*/
+/*}*/
+.secondConfig .ivu-col{
+    height: 100%;
+    position: relative;
+}
+.sanjiaoxing{
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border-width: 20px 20px 0 0;
+    border-style: solid;
+    border-color: transparent #999 transparent;
+}
+
+
+
+.wrap .box{
+    box-sizing: border-box;
+    min-width: 1000px;
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #bbb;
+    border-radius: 10px;
+    box-shadow: 0 0 2px 2px #bbb;
+    margin: 50px 0;
+}
+.wrap .btn_1{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+.box {
+    position: relative;
+    overflow: hidden;
+}
+.title-flex{
+    display: flex;
+    align-items: center;
+}
+.title-flex .ivu-select{width: auto}
+/*.input-list ul{*/
+/*width: 100%;*/
+/*overflow: hidden;*/
+/*overflow-x: scroll;*/
+/*scrollbar-width: none;*/
+/*white-space:nowrap;*/
+/*}*/
+/*!*.input-list ul::-webkit-scrollbar{*!*/
+/*!*display: none;*!*/
+/*!*}*!*/
+/*.input-list li{*/
+/*display: inline-block;*/
+/*width: calc(33.3333% - 10px);*/
+/*margin-right:10px;*/
+/*}*/
+.config_div:after{
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 0;
+    height:0;
+    border-top:30px solid #fff;
+    border-left:30px solid transparent;
+}
+.config_div em{
+    display: inline-block;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 10;
+    color: #737373;
+    line-height: 20px;
+}
+.config_div{
+    height: 100%;
+    padding:5px;
+    position: relative
+}
+.button-list{
+    display: flex;
+    align-items: center;
+    padding-bottom: 10px;
+}
+.button-list h3{
+    color: #000;
+    padding-right: 10px;
+    font-size: 18px;
+    line-height: 30px;}
+.button-list button{
+    font-size: 15px;
+    line-height: 30px;
+    margin-right: 5px;
+}
+.div-list{height: 100%;}
+.div-list .div-ul{
+    overflow: hidden;
+    overflow-y: scroll;
+    height:calc(100% - 40px)
+}
+.div-list .div-li{
+    position: relative;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    list-style: none;
+    margin:15px;
+    padding:10px;
+
+}
+.div-list .div-li>em{
+    display: inline-block;
+    border-radius: 50%;
+    background-color: #f5222d;
+    color: #fff;
+    position: absolute;
+    right: -10px;
+    top:-10px;
+    width: 20px;
+    line-height: 20px;
+    font-size: 12px;
+    text-align: center;
+    user-select: none;
+}
+.div-list .div-li .div-input{
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    flex-wrap: wrap;
+}
+.balabala{
+    background-color: #f8f8f8;
+}
+.div-list .div-li .div-input .div-add{
+    width: 100%;
+    padding-left: 42px;
+    padding-top: 5px;
+}
+.div-list .div-li .div-input input{
+    line-height: 25px;
+}
+.div-list .div-li .div-input span{
+    margin: 0 5px;
+}
+.icon-select-ul{
+    max-height: 200px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    overflow: hidden;
+    overflow-y: scroll;
+    border:1px solid #eee;
+    flex: 1;
+}
+.icon-select-ul li{
+    border-right: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    width: calc(100% / 6);
+    line-height: 50px;
+    text-align: center;
+    font-size: 20px;
+}
+.icon-select-ul li.on{
+    color: #fff;
+    background-color: #2db7f5;
+}
+.icon-select-ul li:nth-child(6n){border-right: none}

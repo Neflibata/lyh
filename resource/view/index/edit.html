@@ -27,7 +27,13 @@
         </td>
         </tr>
         <td class="td-head">地区</td>
-        <td><input name="name" type="text" class="form-control" style="width: 100%;" value="{$vo.name}"/></td>
+        <td><input name="name" type="text" class="form-control" style="width: 100%;" value="{$vo.name}" onkeyup="pym.value= Pinyin.GetJP(this.value);"/></td>
+        </tr>
+        <td class="td-head">拼音缩写</td>
+        <td><input id="pym" name="py" type="text" class="form-control" style="width: 100%;" value="{$vo.abbr}"/></td>
+        </tr>
+        <td class="td-head">唯一标识</td>
+        <td><input name="code" type="text" class="form-control" style="width: 100%;" value="{$vo.indexCode}"/></td>
         </tr>
         <td class="td-head">排序</td>
         <td>

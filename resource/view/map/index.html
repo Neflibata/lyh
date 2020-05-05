@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <include file='public/head'>
+        <link rel="stylesheet" type="text/css" href="__PLUGIN_TMPL__/public/balabala/myVue.css"/>
+
+        <style>
+            table th, table td {
+                text-align: center;
+            }
+
+            .sorttd {
+                width: 86px;
+            }
+
+            .layui-inline .btn {
+                padding: 4px 8px;
+            }
+
+            .wrap, html, body {
+                height: 100%;
+                width: 100%;
+            }
+
+            #map_left {
+                background-color: #393D49;
+                height: 100%;
+                padding: 6px 6px 0px 6px;
+                color: #fff;
+            }
+
+            .table_box {
+                width: 100%;
+                height: 34px;
+                padding: 0px 10px;
+                margin: 8px 0px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                overflow: hidden;
+            }
+
+            .table_key {
+                width: 30%;
+                height: 34px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                float: left;
+
+            }
+
+            .table_value {
+                width: 70%;
+                height: 34px;
+                padding-left: 6px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                float: left;
+            }
+
+            .well {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        </style>
+        </head>
+<body>
+<div class="wrap js-check-wrap" style="height: 100%">
+    <ul class="nav nav-tabs">
+        <li><a href="javascript:history.go(-1)">返回</a></li>
+        <li class="active"><a>地图坐标</a></li>
+    </ul>
+    <form class="well form-inline margin-top-20" style="min-height: 70px; background-color:#393D49;margin-bottom: 0" method="get"
+          action="{:cmf_plugin_url('Resource://school/map')}?indexCode={$find.cameraIndexCode}&id={$find.id}"
+          style="margin-bottom:0">
+       <!-- <div id="ifyid" style="float:left">
+            <select class="form-control" name="indexCode" id="code">
+                <volist name="reg" id="r">
+                     
+                    <if condition="input('request.indexCode/s') eq $r.indexCode">
+                                                            
+                        <option value='{$r.indexCode}' selected>{$r.name}</option>
+                                                        
+                        <else/>
+                                                            
+                        <option value='{$r.indexCode}'>{$r.name}</option>
+                                                        
+                    </if>
+                </volist>
+            </select>
+            <select class="form-control" name="id" id="arrtselect">
+                <volist name="dir" id="d">
+                    <if condition="input('request.id/s') eq $d.id">
+                                                            
+                        <option value='{$d.id}' selected>{$d.dirName}</option>
+                                                        
+                        <else/>
+                                                            
+                        <option value='{$d.id}'>{$d.dirName}</option>
+                                                        
+                    </if>
+                </volist>
+            </select>
+        </div>
+        <input type="submit" class="btn btn-info" value="搜索" style="margin:0 4px 0 10px"/>
+        <a class="btn btn-default" href="javascript:history.go(-1)">返回</a>-->
+    </form>
+    <div class="col-md-2" id="map_left">
+        <!--        <img style="width: 60px " src="http://js2.300c.cn/lhyd/public/uploadFile/20200329/IMG5812dcb6dc7553.jpg"/>-->
+        <div class=" table_box">{$find.dirName}</div>
+        <div class=" table_box">
+            <div class="table_key">经度</div>
+            <div class="table_value">{$find.longitude}</div>
+        </div>
+        <div class=" table_box">
+            <div class="table_key">维度</div>
+            <div class="table_value">{$find.latitude}</div>
+        </div>
+        <div class=" table_box">
+            <div class="table_key">缩写</div>
+            <div class="table_value"><input name="mc" type="text" class="form-control" style="width: 100%;"
+                                            value="{$find.char_abbr}"/></div>
+        </div>
+        <div class=" table_box">
+            <div class="table_key">首拼</div>
+            <div class="table_value"><input name="py" type="text" class="form-control" style="width: 100%;"
+                                            value="{$find.dir_abbr}"/></div>
+        </div>
+        <div class=" table_box">
+            <div class="table_key">新经度</div>
+            <div class="table_value"><input name="longitude" type="text" class="form-control" style="width: 100%;"
+                                            value="{$find.longitude}"/></div>
+        </div>
+        <div class=" table_box">
+            <div class="table_key">新维度</div>
+            <div class="table_value"><input name="latitude" type="text" class="form-control" style="width: 100%;"
+                                            value="{$find.latitude}"/></div>
+        </div>
+
+        <div class=" table_box">
+            <button type="button" class="btn btn-xs btn-success dropdown-toggle" data-toggle="dropdown" name="category"
+                    aria-haspopup="true" aria-expanded="false" onclick="upxy()" style="margin-right: 4px"> 修改
+            </button>
+            <button type="button" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" name="category"
+                    value="0" aria-haspopup="true" aria-expanded="false" onclick="xynull()">清空
+            </button>
+        </div>
+    </div>
+    <div class="col-md-10 map" id="container" style="height: 100%;"></div>
+</div>
+</body>
+<include file='public/scripts'/>
+<script src="__STATIC__/js/layer/layer.js"></script>
+<script src="__STATIC__/js/custom/custom.js"></script>
+<script src="https://webapi.amap.com/maps?v=1.4.15&key=558c527fc7b0e5df0b159af3edeaec32&plugin=AMap.PlaceSearch,AMap.AdvancedInfoWindow"></script>
+<script type="text/javascript">
+    var longitude = '{$find.longitude}'
+    var latitude = '{$find.latitude}'
+    //地图
+    var tzSite = [longitude, latitude]//台州的坐标
+    startMap();
+
+    function startMap() {
+        map = new AMap.Map('container', {
+            resizeEnable: true,//监听尺寸变化
+            center: tzSite,
+            zoom: 17,
+            isHotspot: true//是否开启地图热点和标注效果
+        });
+    }
+
+    //点击经纬度
+    map.on('click', function (e) {
+        $("input[name=longitude]").val(e.lnglat.lng)
+        $("input[name=latitude]").val(e.lnglat.lat)
+    });
+
+    function xynull() {
+        $("input[name=longitude]").val(0)
+        $("input[name=latitude]").val(0)
+    }
+
+    function upxy() {
+        let id = "{$find.id}"
+        let long = $("input[name=longitude]").val()
+        let lat = $("input[name=latitude]").val()
+        let mc = $("input[name=mc]").val()
+        let py = $("input[name=py]").val()
+        let url = "{:cmf_plugin_url('Resource://school/upxy')}";
+        sendajax({id: id, long: long, lat: lat, mc: mc, py: py}, url);
+    }
+
+    //下拉框
+
+    $('#code').change(function(){
+        let box = document.getElementById("arrtselect");
+        if (box) {
+            box.remove();
+        }
+        let code = $('#code').val()
+        $.ajax({
+            url: "{:cmf_plugin_url('Resource://school/getSchool')}", //请求的url地址
+            dataType: "json", //返回格式为json
+            // async:true,//请求是否异步，默认为异步，这也是ajax重要特性
+            data: {"code": code}, //参数值
+            type: "POST", //请求方式
+            success: function (req) {
+                //请求成功时处理
+                if (req.code) {
+                    if (req.data.length > 0) {
+                        $("#ifyid").append("<select class=\"form-control\" name=\"id\" id=\"arrtselect\">");
+                        req.data.map(function (v, i) {
+                            $("#arrtselect").append("<option class=\"d_value\" value=\"" + v.id + "\" >" + v.dirName + "</option>");
+                        })
+                    }
+                } else {
+
+                }
+            }
+        })
+    })
+
+</script>
+
+</body>
+</html>

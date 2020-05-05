@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <include file='public/head'>
+    <link rel="stylesheet" type="text/css" href="__PLUGIN_TMPL__/public/balabala/myVue.css"/>
+
+    <style>
+        table th, table td{text-align: center;}
+        .sorttd{
+            width: 86px;
+        }
+        .layui-inline .btn{
+            padding: 4px 8px;
+        }
+        [v-cloak]{
+            display: none
+        }
+    </style>
+</head>
+
+<body>
+<div class="wrap js-check-wrap">
+    <php>$currentTab=4;</php>
+    <ul class="nav nav-tabs">
+        <include file="public@nav"/>
+    </ul>
+    <div class="well form-inline margin-top-20" >
+        <button type="submit" class="btn btn-info" onclick="create()">添加</button>
+    </div>
+    <table class="table table-bordered table-hover" style="text-align:center;">
+        <thead>
+        <tr>
+            <th><input onclick="selectAll()" type="checkbox" name="controlAll" id="controlAll"></th>
+            <th>ID</th>
+            <th>排序</th>
+            <th>描述</th>
+            <th>内容</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <volist name="list" id="vo">
+            <td>
+                <input class="checkboxes" type="checkbox" value="{$vo.id}" name="selected">
+            </td>
+            <td>{$vo.id}</td>
+            <td align="center" class="sorttd"><input name="sort" type="text" class="form-control" style="width: 50px;height: 30px; text-align: center;margin-left: 9px" value="{$vo.sort}"/></td>
+            <td>{$vo.title}</td>
+            <td>{$vo.value}</td>
+            <td>
+                <a href="javascript:" class="btn btn-xs btn-success " onclick="edit({$vo.id})">编辑</a>
+                <if condition="$vo.show_status eq 0">
+                    <a class="btn btn-xs btn-warning js-ajax-delete"  href="{:cmf_plugin_url('resource://general/upStatus')}?id={$vo.id}&code=1" data-msg="确定启用吗？"
+                       data-refresh="{:cmf_plugin_url('resource://general/index')}">禁用</a>
+                    <else/>
+                    <a class="btn btn-xs btn-info js-ajax-delete"  href="{:cmf_plugin_url('resource://general/upStatus')}?id={$vo.id}&code=0" data-msg="确定禁用吗？"
+                       data-refresh="{:cmf_plugin_url('resource://general/index')}">启用</a>
+                </if>
+            </td>
+        </tr>
+        </volist>
+        </tbody>
+    </table>
+        <div class="layui-inline">
+            <button class="btn btn-primary btn-sm" onclick="sortarr();">批量排序</button>
+            <button class="btn btn-danger btn-sm" onclick="deletearr();">批量删除</button>
+        </div>
+</div>
+</body>
+<include file='public/scripts'/>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.21/dist/vue.js"></script>
+<script src="__STATIC__/js/layer/layer.js"></script>
+<script src="__STATIC__/js/custom/custom.js"></script>
+<script src="__PLUGIN_TMPL__/public/balabala/myVue.js"></script>
+<script src="__PLUGIN_TMPL__/public/balabala/ajax.js"></script>
+<link  rel="stylesheet" type="text/css" href="__PLUGIN_TMPL__/public/balabala/iconfont.css">
+
+<script type="text/javascript">
+    function deletearr(){
+        let url="{:cmf_plugin_url('resource://general/deleteArr')}"
+        let arr=[]
+        var length = $("input[name=selected]").length;
+        for (var i=0;i<length;i++){
+            if($("input[name=selected]").eq(i).prop("checked")){
+                let json = $("input[name=selected]").eq(i).attr('value');
+                arr.push(json)
+            }
+        }
+        layer.confirm('确定删除选中项吗？', {
+            btn: ['确定','取消'] //按钮
+        }, function(){
+            if(arr.length==0){
+                layer.msg('请选择内容')
+                return false
+            }
+            sendajax({"arr":arr}, url);
+            return false
+        }, function(){
+
+        });
+        return false;
+    }
+    function selectAll(){
+        var checklist = document.getElementsByName ("selected");
+        if(document.getElementById("controlAll").checked)
+        {
+            for(var i=0;i<checklist.length;i++)
+            {
+                checklist[i].checked = 1;
+            }
+        }else{
+            for(var j=0;j<checklist.length;j++)
+            {
+                checklist[j].checked = 0;
+            }
+        }
+    }
+    function sortarr(){
+        let url="{:cmf_plugin_url('resource://general/sortArr')}"
+        let arr={}
+        var length = $("input[name=selected]").length;
+        for (var i=0;i<length;i++){
+            let id = $("input[name=selected]").eq(i).attr('value');
+            let sort = $("input[name=sort]").eq(i).val();
+            let idjson={'id':id,'sort':sort}
+            arr[i]=idjson
+        }
+        layer.confirm('确定重新排序吗？', {
+            btn: ['确定','取消'] //按钮
+        }, function(){
+            sendajax({"arr":arr}, url);
+            return false
+        }, function(){
+
+        });
+        return false;
+    }
+    function create(){
+        let url = "{:cmf_plugin_url('resource://general/insert')}"
+        layer.open({
+            type: 2,
+            title: "添加概况",
+            shadeClose: true,
+            shade: 0.4,
+            area: ['620px', '62%'],
+            scrollbar: false,
+            btn: ['确定', '关闭'],
+            content: ["{:cmf_plugin_url('resource://general/create')}"],
+            yes:function(index, layero){
+                let body = layer.getChildFrame('body', index);
+                let data = body.find('#fm').serialize();
+                sendajax(data, url);
+            }
+        });
+    }
+    function edit(id){
+        let url = "{:cmf_plugin_url('resource://general/update')}"
+        layer.open({
+            type: 2,
+            title: "修改概况",
+            shadeClose: true,
+            shade: 0.4,
+            area: ['620px', '62%'],
+            scrollbar: false,
+            btn: ['确定', '关闭'],
+            content: ["{:cmf_plugin_url('resource://general/edit')}?id="+id],
+            yes:function(index, layero){
+                let body = layer.getChildFrame('body', index);
+                let data = body.find('#fm').serialize();
+                sendajax(data, url);
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

@@ -3,7 +3,7 @@ namespace plugins\Resource\controller;
 
 use cmf\controller\PluginAdminBaseController;//引入此类
 use think\Db;
-
+use plugins\resource\validate\IndexValidate;
 class IndexController extends PluginAdminBaseController
 {
 
@@ -11,6 +11,8 @@ class IndexController extends PluginAdminBaseController
     {
         $param=input('');
         $where=[];
+//        $where['parentIndexCode']=['eq','root000000'];
+//        $where['abbr']=['exp','is not null'];//菜单不要第一级
         if(!empty($param['text'])){
             switch ($param['search_key']) {
                 case 1:
@@ -28,28 +30,18 @@ class IndexController extends PluginAdminBaseController
         }
         $list=Db::name('statistics_regions')
             ->where($where)
-            ->order('sort asc,id asc')
+            ->order('parentIndexCode desc,sort asc,is_show desc,id asc')
             ->select()
             ->each(function($item, $key){
                 $item['parent_name'] = Db::name('statistics_regions')->where('indexCode',$item['parentIndexCode'])->value('name');
                 return $item;
             });
-//        $newlist=[];
-//        foreach ($list as $k=>$v){
-//            $newlist[$k]=$v;
-//            foreach ($list as $key=>$val){
-//                if($v['parentIndexCode']==$val['indexCode']){
-//                    $newlist[$k]['parent_name']=$val['name'];
-//                    break;
-//                }
-//            }
-//        }
         $this->assign('list',$list);
         return $this->fetch('/index/index');
     }
     public function create()
     {
-        $select=Db::name('statistics_regions')->select();
+        $select=Db::name('statistics_regions')->where('abbr','not null')->select();
         $this->assign('select',$select);
         return $this->fetch('/index/create');
     }
@@ -58,7 +50,7 @@ class IndexController extends PluginAdminBaseController
         $id=input('id');
         $find=Db::name('statistics_regions')->where('id',$id)->find();
 //        $find['par_name']=Db::name('statistics_regions')->where('indexCode',$find['parentIndexCode'])->value('name');
-        $select=Db::name('statistics_regions')->select();
+        $select=Db::name('statistics_regions')->where('abbr','not null')->select();
         $this->assign('vo',$find);
         $this->assign('select',$select);
         return $this->fetch('/index/edit');
@@ -69,9 +61,19 @@ class IndexController extends PluginAdminBaseController
         if($param['id']==1){
             $this->error('不可修改当前地区');
         }
+        $indexV=new IndexValidate();
+        if(!$indexV->check($param)){
+            $this->error($indexV->getError());
+        }
         $is_up=Db::name('statistics_regions')
             ->where('id',$param['id'])
-            ->update(['parentIndexCode'=>trim($param['parentIndexCode']),'name'=>$param['name'],'sort'=>$param['sort']]);
+            ->update([
+                'parentIndexCode'=>trim($param['parentIndexCode']),
+                'name'=>$param['name'],
+                'sort'=>$param['sort'],
+                'abbr'=>$param['py'],
+                'indexCode'=>$param['code']
+            ]);
         if($is_up!==false){
             $this->success('修改成功');
         }else{
@@ -81,13 +83,17 @@ class IndexController extends PluginAdminBaseController
     public function insert()
     {
         $param=input('');
-
+        $indexV=new IndexValidate();
+        if(!$indexV->check($param)){
+            $this->error($indexV->getError());
+        }
         $is_in=Db::name('statistics_regions')
             ->insert([
                 'parentIndexCode'=>trim($param['parentIndexCode']),
                 'name'=>$param['name'],
                 'sort'=>$param['sort'],
-                'indexCode'=>$this->getfour_str(8).'-'.$this->getfour_str(4).'-'.$this->getfour_str(4).'-'.$this->getfour_str(12)
+                'abbr'=>$param['py'],
+                'indexCode'=>$param['code']
             ]);
         if($is_in>0){
             $this->success('创建成功');
@@ -135,6 +141,63 @@ class IndexController extends PluginAdminBaseController
             Db::name('statistics_regions')->where('id',$item)->delete();
         }
         $this->success('删除成功');
+    }
+
+    /**
+     * 更新数据
+     */
+    public function renewal()
+    {
+
+        $postData = [
+            "pageNo" => 1,
+            "pageSize" => 200,
+            "treeCode" => "0"
+        ];
+        $hk=new Haikang();
+        $result = $hk->doCurl($postData, $hk->all_tree);
+        $arr=json_decode($result,true);
+        $list=Db::name('statistics_regions')->select();
+        if(!isset($arr['data']['list'])){
+            $this->error('获取失败，请重试');
+        }
+        $num=0;
+        foreach ($arr['data']['list'] as $k=>$v){
+            $i=0;
+            foreach ($list as $key=>$val){
+                if($v['indexCode']==$val['indexCode']){
+                    $i=1;
+                }
+            }
+            if($i<1){
+                Db::name('statistics_regions')->insert($v);
+                $num++;
+            }
+        }
+        if($num>0){
+            $this->success('更新成功，新增'.$num."条数据");
+        }else{
+            $this->error('未发现新的数据');
+        }
+
+    }
+
+    /**
+     * 显示隐藏
+     */
+    public function upStatus()
+    {
+        $param=input('');
+        if(empty($param['id'])){
+            $this->error('参数错误');
+        }
+        $is_up=Db::name('statistics_regions')->where('id',$param['id'])->update(['is_show'=>$param['code']]);
+        if($is_up!==false){
+            $this->success('操作成功');
+        }else{
+            $this->error('操作失败');
+        }
+
     }
     public function sortArr()
     {

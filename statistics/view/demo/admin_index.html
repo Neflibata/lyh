@@ -1,0 +1,257 @@
+
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <title>点击的dome</title>
+    <include file="public@head"/>
+    <include file="public@chart"/>
+    <style>
+        html,body{width:100%;height:100%;margin:0px;}
+        .map{height:90%;width:100%;float:left;}
+        .info-title{font-weight:bolder;color:#fff;font-size:14px;line-height:26px;padding:0 0 0 6px;background:#25A5F7}
+        .info-content{padding:4px;color:#666666;line-height:23px;font:12px Helvetica,'Hiragino Sans GB','Microsoft Yahei','微软雅黑',Arial;}
+        .info-content img{float:left;margin:3px;}
+        .amap-info-combo .keyword-input{height:auto;}
+        .mar{position:relative;}
+        .martext{position:absolute;left:7px;top:6px;color:#ffffff;z-index:999}
+        .marker_info{height:120px;width:200px;padding:50px 7px;position:absolute;left: -90px;top: -122px;background: #ffffff;border-radius:8px; }
+        .btn-info{margin-left: 6px;}
+        [v-cloak] {
+            display: none;
+        }
+        #content{
+            height: 100%;
+            width: 100%;
+        }
+        .select_tier{
+            height: 78px;
+            background-color: #fff;
+            padding: 20px 0 0 30px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 999;
+        }
+        .input_box{
+            height: 36px;
+            width: 300px;
+            float: left;
+            /*border:1px solid red;*/
+        }
+        .input_box span{
+            font-size: 14px;
+            font-weight:600;
+            line-height: 36px;
+        }
+        .select_input{
+            width: 220px;
+            position: relative;
+            top: -2px;
+        }
+    </style>
+</head>
+<body>
+<div id="content" v-cloak>
+    <Row class="select_content">
+        <i-col span="24" class="select_tier">
+            <div class="input_box">
+                <span>选择区域:</span>
+                <i-select :model.sync="select1" slot="prepend" class="select_input"  filterable placeholder="请选择区域" on-change="selectReg()">
+                    <i-option v-for="(item,index) in info.regions" :key="item.id" :value="item.id" @click.native="selectReg(item.indexCode)">{{item.name}}</i-option>
+                </i-select>
+            </div>
+            <div class="input_box">
+                <span>选择学校:</span>
+                <i-select slot="prepend" class="select_input" placeholder="请选择学校" filterable ref="resetSelect" clearable>
+                    <i-option v-for="(item,index) in dir" :key="item.id" :value="item.id" @click.native="selectDir(item)">{{item.dirName}}</i-option>
+                </i-select>
+            </div>
+            <i-button type="info" @click="selectValue()">查找位置</i-button>
+        </i-col>
+    </Row>
+    <div id="container" class="map"></div>
+    <div id="xy" style="color: red;height: 80px;width: 160px;"></div>
+    <Modal
+            v-model="visible"
+            title="学校监控">
+        <p>Content of dialog</p>
+        <p>Content of dialog</p>
+        <p>Content of dialog</p>
+    </Modal>
+</div>
+</body>
+<include file="public@scripts"/>
+<script src="https://webapi.amap.com/maps?v=1.4.15&key=558c527fc7b0e5df0b159af3edeaec32&plugin=AMap.PlaceSearch,AMap.AdvancedInfoWindow"></script>
+
+<script>
+    new Vue({
+        el: "#content",
+        data: {
+            select1: 0,
+            lineArr:[[121.434756, 28.666385], [121.437235, 28.660603], [121.435004, 28.657439], [121.426592, 28.638458], [121.425734, 28.636499], [121.411658, 28.637253], [121.412001, 28.664971], [121.397067, 28.664218], [121.395865, 28.643882]],
+            tzSite:[121.15923,28.861499],//台州的坐标
+            map:{},//地图
+            marker:{},//点标记
+            isPath:false,
+            pline:{},
+            infoWindow:{},
+            info:{},//地点数据
+            dir:{},//学校目录
+            school:{},//学校
+            visible: false,//视频框
+            markerArr:[
+                {id:1,isSign:false,unit:0,text:'单',xy:[121.156569,28.86646],line:[[121.156569,28.86646],[121.140984,28.853966],[121.106308,28.859078]]},
+                {id:2,isSign:false,unit:0,text:'车',xy:[121.214848,28.871721],line:[[121.214848,28.871721],[121.193855,28.892148],[121.211365,28.921301]]},
+                {id:3,isSign:false,unit:0,text:'车',xy:[121.150561,28.830675],line:[[121.150561,28.830675],[121.151798,28.810491],[121.131027,28.815605]]}
+            ]
+        },
+        created:function(){
+            let _this=this
+            window. markerHint= _this.markerHint
+            window. opvideo= _this.opvideo
+            window. polyline= _this.polyline
+            window.markerClick=_this.markerClick
+            $.ajax({
+                type : "POST",
+                dataType : "json",
+                async: false,
+                url : "{:cmf_plugin_url('statistics://api_index/getMapSelectDir')}",
+                data:{},
+                success : function(data) {
+                    _this.info=data.data
+                    console.log(_this.info)
+                },
+                error:function () {
+                    layer.msg('请检查网络');
+                }
+            });
+        },
+        mounted: function () {
+            this.startMap();//地图
+            this.getxy();//经纬度
+            this.redian();//热点
+            // this.addsite();//标点
+        },
+        methods:{
+            //查找位置
+            selectValue:function(){
+               let _this=this
+                this.map.setZoomAndCenter(17, [_this.school.longitude,_this.school.latitude]);
+                this.tzSite=[_this.school.longitude,_this.school.latitude];
+                // this.addsite();
+            },
+            //选择学校
+            selectDir:function(item){
+                console.log(item)
+                // this.map.setCenter([item.longitude,item.latitude]); //设置地图中心点
+                this.school=item
+            },
+            //选择区域
+            selectReg:function(code){
+                let _this= this;
+                let key=0;
+                _this.$refs.resetSelect.clearSingleSelect();
+                _this.dir={};
+                _this.info.dir.map((v,k) => {
+                    if(code==v.cameraIndexCode){
+                        _this.dir[key]=v;
+                        key++;
+                    }
+                });
+            },
+            //地图
+            startMap:function(){
+                let _this=this
+                _this.map = new AMap.Map('container', {
+                    resizeEnable: true,//监听尺寸变化
+                    center: _this.tzSite,
+                    zoom: 12,
+                    isHotspot: true//是否开启地图热点和标注效果
+                });
+            },
+
+            //点击经纬度
+            getxy:function(){
+                let _this=this
+                _this.map.on('click', function (e) {
+                    $("#xy").text(e.lnglat.getLng() + ',' + e.lnglat.getLat())
+                });
+            },
+            //添加点标记
+            addsite: function (lo,la) {
+                let _this=this
+                console.log(_this.school)
+                _this.map.remove(_this.marker);
+                _this.marker = new AMap.Marker({
+                    position: _this.tzSite,
+                    map: _this.map,
+                    offset: new AMap.Pixel(-13, -30)
+                });
+                _this.marker.content = '<div style="width: 200px">是否查看【' + _this.school.dirName + '】视频？</div><a class=\'btn btn-info\' onclick=\'opvideo()\' style="margin-left: 12px;margin-top: 10px">查看监控</a></div>';
+                _this.marker.on('click', markerClick);
+                _this.marker.emit('click', {target: _this.marker});
+                _this.marker.setMap(_this.map);
+            },
+            markerClick:function(e) {
+                let _this=this
+                _this.infoWindow = new AMap.InfoWindow({offset: new AMap.Pixel(0, -30)});
+                _this.infoWindow.setContent(e.target.content);
+                _this.infoWindow.open(_this.map, e.target.getPosition());
+            },
+            //轨迹
+            polyline:function(key){
+                let _this=this
+                let line=_this.markerArr[key]
+                $("div[data-key="+line.id+"]").find('.marker_info').remove()
+                    _this.pline=new AMap.Polyline({
+                        map: _this.map,
+                        path: line.line,
+                        showDir: true,
+                        strokeColor: "#28F",  //线颜色
+                        // strokeOpacity: 1,     //线透明度
+                        strokeWeight: 6,      //线宽
+                        // strokeStyle: "solid"  //线样式
+                    });
+
+            },
+            //查看监控
+            opvideo:function(){
+                this.visible = true;
+
+            },
+            //显示热点
+            redian:function(){
+                let _this=this
+                let placeSearch = new AMap.PlaceSearch();  //构造地点查询类
+                let infoWindow = new AMap.InfoWindow({});//信息
+                _this.map.on('hotspotclick', function (result) {
+                    placeSearch.getDetails(result.id, function (status, result) {
+                        if (status === 'complete' && result.info === 'OK') {
+                            let poiArr = result.poiList.pois;
+                            let location = poiArr[0].location;
+                            infoWindow.setContent(_this.createContent(poiArr[0]));
+                            infoWindow.open(_this.map, location);
+                        }
+                    });
+                });
+            },
+            createContent:function(e){
+                let s = [];
+                s.push('<div style="width: 200px">是否查看【' + e.name + '】视频？</div><a class=\'btn btn-info\' onclick=\'opvideo()\' style="margin-left: 12px;margin-top: 10px">查看视频</a>');
+                s.push('<div>');
+                return s.join("<br>");
+            },
+            //绘制轨迹
+            addpath: function () {
+                marker.moveAlong(lineArr, 1000);
+            }
+        }
+    })
+
+
+
+</script>
+</html>

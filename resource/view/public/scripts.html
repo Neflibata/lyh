@@ -10,11 +10,12 @@
 </script>
 <script src="__STATIC__/js/jquery.js"></script>
 <script src="__STATIC__/js/wind.js"></script>
-<script src="__STATIC__/js/bootstrap.min.js"></script>
 <script src="__STATIC__/js/admin.js"></script>
 <script src="__STATIC__/js/layer/layer.js"></script>
-<script src="__PLUGIN_TMPL__/assets/layui/layui.all.js"></script>
 <script src="__STATIC__/js/datePicker/datePicker.js"></script>
+<script src="__PLUGIN_TMPL__/public/assets/layui/layui.all.js"></script>
+<script src="__STATIC__/js/bootstrap.min.js"></script>
+<script src="__PLUGIN_TMPL__/public/assets/js/ChinesePy.js"></script>
 <script>
     function sendajax(vars,post_url,type="JSON"){
         $.ajax({
@@ -24,17 +25,19 @@
             url : post_url,
             data : vars,
             success : function(data) {
+                layer.closeAll();
                 if (data.code) {
-                    layer.closeAll();
                     layer.msg(data.msg, {icon: 1});
                     setTimeout(function () {
                         location.reload();
                     }, 1200)
                 } else {
+                    layer.closeAll();
                     layer.msg(data.msg);
                 }
             },
             error:function () {
+                layer.closeAll();
                 layer.msg('请检查网络');
             }
         });

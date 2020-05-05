@@ -1,0 +1,126 @@
+<include file="public@head"/>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .td-head {
+            font-weight: bold;
+            width: 34%;
+        }
+    </style>
+</head>
+<body>
+<form role="form" id="fm" class="form-horizontal"  enctype="multipart/form-data"  method="post" action="">
+    <input name="id" type="hidden" class="form-control" value="{$find.id}"/>
+<div style="padding:18px 20px 2px 20px ">
+    <table class="table table-bordered table-hover" style="text-align:center;margin-bottom:0">
+        <tbody>
+        <td class="td-head">ID</td>
+        <td><input name="name" type="text" class="form-control" style="width: 100%;" value="{$find.id}" readonly/></td>
+        </tr>
+        <td class="td-head">所属区域</td>
+        <td>
+            <select class="form-control"  name="indexCode" id="indexCode">
+                <volist name="reg" id="v">
+                   <option value='{$v.indexCode}' <if condition="$find.indexCode eq $v.indexCode">selected</if>>{$v.name}</option>                             
+                </volist>
+            </select>
+        </td>
+        </tr>
+        <td class="td-head">所属目录</td>
+        <td id="ifyid">
+            <select class="form-control"  name="sub" id="sub">
+                <volist name="subreg" id="v">
+                    <option value='{$v.indexCode}' <if condition="$find.subCode eq $v.indexCode">selected</if>>{$v.name}</option>                             
+                </volist>
+            </select>
+        </td>
+        </tr>
+        <td class="td-head">所属学校</td>
+        <td id="ifdir">
+            <select class="form-control"  name="dir" id="dir">
+                <volist name="dir" id="v">
+                    <option value='{$v.indexCode}' <if condition="$find.encodeDevIndexCode eq $v.indexCode">selected</if>>{$v.dirName}</option>                             
+                </volist>
+            </select>
+        </td>
+        </tr>
+        <td class="td-head">监控点</td>
+        <td><input name="cameraName" type="text" class="form-control" style="width: 100%;" value="{$find.cameraName}" /></td>
+        </tr>
+        <td class="td-head">监控点编号</td>
+        <td><input name="cameraIndexCode" type="text" class="form-control" style="width: 100%;" value="{$find.cameraIndexCode}" /></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</form>
+</body>
+<include file="public@scripts"/>
+<script src="__STATIC__/js/wind.js"></script>
+<script>
+    //区域选中
+    $('#indexCode').change(function(){
+        let sub = document.getElementById("sub");
+    if (sub) {
+        sub.remove();
+    }
+    let dir = document.getElementById("dir");
+    if (dir) {
+        dir.remove();
+    }
+    let code = $('#indexCode').val()
+    $.ajax({
+        url: "{:cmf_plugin_url('Resource://Camera/getSubReg')}", //请求的url地址
+        dataType: "json", //返回格式为json
+        // async:true,//请求是否异步，默认为异步，这也是ajax重要特性
+        data: {"code": code}, //参数值
+        type: "POST", //请求方式
+        success: function (req) {
+            //请求成功时处理
+            if (req.code) {
+                if(req.data.sub.length>0){
+                    $("#ifyid").append("<select class=\"form-control\"  name=\"sub\" id=\"sub\"></select>");
+                    req.data.sub.map(function (v, i) {
+                        $("#sub").append("<option value=\""+v.indexCode+"\" >"+v.name+"</option>");
+                    })
+                }
+                if(req.data.dir.length>0){
+                    $("#ifdir").append("<select class=\"form-control\"  name=\"dir\" id=\"dir\"></select>");
+                    req.data.dir.map(function (v, i) {
+                        $("#dir").append("<option value=\""+v.indexCode+"\" >"+v.dirName+"</option>");
+                    })
+                }
+            }
+        }
+    })
+    })
+    //目录选中
+
+    $(document).on('click', '#sub', function(){
+        let dir = document.getElementById("dir");
+        if (dir) {
+            dir.remove();
+        }
+        let code = $('#sub').val()
+        $.ajax({
+            url: "{:cmf_plugin_url('Resource://Camera/getSchool')}", //请求的url地址
+            dataType: "json", //返回格式为json
+            // async:true,//请求是否异步，默认为异步，这也是ajax重要特性
+            data: {"code": code}, //参数值
+            type: "POST", //请求方式
+            success: function (req) {
+                //请求成功时处理
+                if (req.code) {
+                    if(req.data.length>0){
+                        $("#ifdir").append("<select class=\"form-control\"  name=\"dir\" id=\"dir\"></select>");
+                        req.data.map(function (v, i) {
+                            $("#dir").append("<option value=\""+v.indexCode+"\" >"+v.dirName+"</option>");
+                        })
+                    }
+                }
+            }
+        })
+    });
+</script>
+</html>

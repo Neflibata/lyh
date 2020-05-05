@@ -213,5 +213,19 @@ class ApiIndexController extends PluginRestBaseController
 //        halt($list);
         return zy_json_echo(true,'获取成功',$list,200);
     }
+    /**
+     * 替换base
+     */
+    public function upT()
+    {
 
+        $list=Db::name('statistics_face_stranger')->select();
+        foreach ($list as $k=>$v) {
+            Db::name('statistics_face_stranger')->where('id',$v['id'])->update([
+//                'bkgUrl'=>'https://111.3.64.34:446/frs/ui/facePic/fetchPicDetail?pictureUrl='.base64_encode($v['bkgUrl']),
+                'faceUrl'=>'https://111.3.64.34:446/ngx/proxy?i='.base64_encode($v['originalFaceUrl'])
+            ]);
+        }
+        echo 'ok';
+    }
 }

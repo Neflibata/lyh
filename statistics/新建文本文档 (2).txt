@@ -1,0 +1,16 @@
+陌生人员
+重点人员
+---------------
+陌生人员表
+已有人员表
+重点人员表 监控到重点人员向前台发送消息
+---------------------
+需要建的表
+区域cmf_statistics_regions
+学校目录cmf_statistics_dir
+摄像头表cmf_statistics_cameras
+人员分组cmf_statistics_face_group
+"indexCode":"bf04c407-e727-4860-940c-3593e4e1b446","name":"正常","description":"描述"
+正常人表
+陌生人表
+重点人员表

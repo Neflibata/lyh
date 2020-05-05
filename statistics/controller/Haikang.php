@@ -9,9 +9,12 @@ header('Content-type:text/html; Charset=utf-8');
 date_default_timezone_set('PRC');
 class Haikang
 {
+//    public $pre_url = "https://10.22.113.85:446";
+//    protected $app_key = "24387968";
+//    protected $app_secret = "DDZd1gZIBoEvwUKx0vVx";
     public $pre_url = "https://111.3.64.34:446";
-    protected $app_key = "24387968";
-    protected $app_secret = "DDZd1gZIBoEvwUKx0vVx";
+    protected $app_key = "20307173";
+    protected $app_secret = "GcBtnm6uvyjiuKyvYne7";
 
     public $time ;//时间戳
     public $content_type="application/json";//类型
@@ -22,12 +25,15 @@ class Haikang
     public $upload_face_list_url = "/artemis/api/frs/v1/face/single/update";//修改人脸人脸照片
     public $api_face="/artemis/api/frs/v1/face";//查询人脸
     public $group_list_url = "/artemis/api/frs/v1/face/group/single/addition";//添加分组
+    public $delete_face="/artemis/api/frs/v1/face/deletion";//删除人脸
 
     public $resource_regions = "/artemis/api/resource/v1/regions";//区域目录
     public $regions_subRegions ="/artemis/api/resource/v1/regions/subRegions";//区域下级
     public $resource_cameras = "/artemis/api/resource/v1/cameras";//摄像头目录
     public $crossing_cross="/artemis/api/resource/v1/crossing/getCrossingsWithPage";//卡口数据
     public $regions_root="/artemis/api/resource/v1/cameras";//查询根区域
+    public $get_all_tree_code="/artemis/api/resource/v1/unit/getAllTreeCode";//获取所有区域树
+    public $sub_resources="/artemis/api/irds/v1/resource/subResources";//获取所有区域树
 
     public  $event_byeventtypes="/artemis/api/eventService/v1/eventSubscriptionByEventTypes";//1.2事件订阅
     public  $event_un_byeventtypes="/artemis/api/eventService/v1/eventUnSubscriptionByEventTypes";//1.2取消事件订阅
@@ -41,6 +47,10 @@ class Haikang
     public $resource_recognition="/artemis/api/frs/v1/resource/recognition";//识别资源
     public $black_addition="/artemis/api/frs/v1/plan/recognition/black/addition";//添加重点人员识别计划
     public $recognition_black="/api/frs/v1/plan/recognition/black";//查询重点人员识别计划
+
+    public $camera_get="/artemis/api/nms/v1/online/camera/get";//获取在线状态
+    public $new="/artemis/api/irds/v1/resource/resource";
+    public $online_get="/artemis/api/nms/v1/online/get";//获取在线状态
     public function __construct($app_key='', $app_secret='')
     {
         if($app_key!='') $this->app_key = $app_key;

@@ -1,0 +1,40 @@
+<include file="public@head"/>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .td-head {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<form role="form" id="fm" class="form-horizontal"  enctype="multipart/form-data"  method="post" action="">
+    <input type="hidden" class="form-control" name="id" value="{$find.id}">
+<div style="padding:18px 20px 2px 20px ">
+    <table class="table table-bordered table-hover" style="margin-bottom:0">
+        <tbody>
+        <td class="td-head">描述</td>
+        <td>
+            <input type="text" class="form-control" name="title" value="{$find.title}">
+        </td>
+        </tr>
+        <td class="td-head">内容</td>
+        <td>
+            <input type="text" class="form-control" name="value" value="{$find.value}"/>
+        </td>
+        </tr>
+        <td class="td-head">排序</td>
+        <td><input name="sort" type="text" class="form-control" style="width: 100%;" value="{$find.sort}"/></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</form>
+</body>
+<include file="public@scripts"/>
+<script src="__STATIC__/js/wind.js"></script>
+<script>
+    //上传图片
+</script>
+</html>

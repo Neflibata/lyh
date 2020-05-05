@@ -24,7 +24,7 @@ class AdminIndexController extends PluginAdminBaseController
      *     'parent' => 'admin/Plugin/default',
      *     'display'=> true,
      *     'hasView'=> true,
-     *     'order'  => 10000,
+     *     'order'  => 1000,
      *     'icon'   => '',
      *     'remark' => '监控资源目录',
      *     'param'  => ''
@@ -35,6 +35,19 @@ class AdminIndexController extends PluginAdminBaseController
         $index=new IndexController();
         return $index->index();
     }
+    /**
+     * 资源目录
+     * @adminMenu(
+     *     'name'   => '学校目录',
+     *     'parent' => 'index',
+     *     'display'=> true,
+     *     'hasView'=> true,
+     *     'order'  => 1000,
+     *     'icon'   => '',
+     *     'remark' => '目录',
+     *     'param'  => ''
+     * )
+     */
     public function school()
     {
         $school=new SchoolController();

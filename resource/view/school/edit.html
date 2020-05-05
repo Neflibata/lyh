@@ -9,49 +9,156 @@
     </style>
 </head>
 <body>
-<form role="form" id="fm" class="form-horizontal"  enctype="multipart/form-data"  method="post" action="">
+<form role="form" id="fm" class="form-horizontal" enctype="multipart/form-data" method="post" action="">
     <input name="id" type="hidden" class="form-control" value="{$vo.id}"/>
-<div style="padding:18px 20px 2px 20px ">
-    <table class="table table-bordered table-hover" style="text-align:center;margin-bottom:0">
-        <tbody>
-        <td class="td-head">学校ID</td>
-        <td>
-            <input name="id" type="text" class="form-control" style="width: 100%;" disabled value="{$vo.id}"/>
-        </td>
-        </tr>
-        <td class="td-head">地区</td>
-        <td>
-            <select class="form-control"  name="indexCode">
-                <volist name="select" id="v">
-                    <option value='{$v.indexCode}'  <if condition="$vo.cameraIndexCode eq $v.indexCode">selected</if>>{$v.name}</option>                             
-                </volist>
-            </select>
-        </td>
-        </tr>
-        <td class="td-head">学校名称</td>
-        <td>
-            <input name="school_name" type="text" class="form-control" style="width: 100%;" value="{$vo.dirName}"/>
-        </td>
-        </tr>
-        <td class="td-head">经度</td>
-        <td>
-            <input name="longitude" type="text" class="form-control" style="width: 100%;" value="{$vo.longitude}" />
-        </td>
-        </tr>
-        <td class="td-head">纬度</td>
-        <td>
-            <input name="latitude" type="text" class="form-control" style="width: 100%;" value="{$vo.latitude}"/>
-        </td>
-        </tr>
-        </tbody>
-    </table>
-</div>
+    <div style="padding:18px 20px 2px 20px ">
+        <table class="table table-bordered table-hover" style="text-align:center;margin-bottom:0">
+            <tbody>
+            <td class="td-head">地区</td>
+            <td>
+                <select class="form-control" name="indexCode">
+                    <volist name="select" id="v">
+                         
+                        <if condition="$vo.code eq $v.indexCode">
+                                                                
+                            <option value='{$v.indexCode}' selected>{$v.name}</option>
+                                                            
+                            <else/>
+                                                                
+                            <option value='{$v.indexCode}'>{$v.name}</option>
+                                                            
+                        </if>
+                                                    
+                    </volist>
+                </select>
+            </td>
+            <td class="td-head">学校名称</td>
+            <td>
+                <input name="dir_name" type="text" class="form-control" style="width: 100%;" value="{$vo.dirName}"
+                       onkeyup="pym.value= Pinyin.GetJP(this.value);"/>
+            </td>
+            </tr>
+            <td class="td-head">学校图片</td>
+            <td id="img_pre">
+                <if condition="empty($vo.school_cover)">
+                    <div id="test1" style="float:left">
+                        <a class="btn btn-xs btn-success" style="margin: 4px 0px 0px 4px;float: left">选择图片</a>
+                    </div>
+                    <else/>
+                    <div id="test1" style="float:left">
+                        <img src="{$vo.school_cover}" style="float: left;width: 80px"/>
+                        <input type="hidden" name="img_url" value="{$vo.school_cover}"/>
+                    </div>
+                    <a class="btn btn-xs btn-danger js-ajax-delete xibtn" onclick="de_img()" style='float:left'>删除</a>
+                </if>
+            </td>
+            <td class="td-head">学生人数</td>
+            <td>
+                <input name="student_num" type="text" class="form-control" value="{$vo.student_num}"/>
+            </td>
+            </tr>
+            <tr>
+                <td class="td-head">单位名称</td>
+                <td>
+                    <input name="company" type="text" class="form-control" value="{$vo.company}"/>
+                </td>
+                <td class="td-head">所属街道</td>
+                <td>
+                    <input name="street" type="text" class="form-control" value="{$vo.street}"/>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-head">学校联系人</td>
+                <td>
+                    <input name="personCharge" type="text" class="form-control" value="{$vo.personCharge}"/>
+                </td>
+                <td class="td-head">联系电话</td>
+                <td>
+                    <input name="personChargePhone" type="text" class="form-control" placeholder="请输入学校联系电话"
+                           value="{$vo.personChargePhone}"/>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-head">食堂联系人</td>
+                <td>
+                    <input name="canteen_nickname" type="text" class="form-control" value="{$vo.canteen_nickname}"/>
+                </td>
+                <td class="td-head">联系电话</td>
+                <td>
+                    <input name="canteen_phone" type="text" class="form-control" placeholder="请输入食堂联系电话"
+                           value="{$vo.canteen_phone}"/>
+                </td>
+            </tr>
+            <tr>
+                <td class="td-head">教职工人数</td>
+                <td>
+                    <input name="teacher_num" type="text" class="form-control" value="{$vo.teacher_num}"/>
+                </td>
+                <td class="td-head">食堂员工数</td>
+                <td>
+                    <input name="canteen_num" type="text" class="form-control" value="{$vo.canteen_num}"/>
+                </td>
+            </tr>
+            <td class="td-head">经度</td>
+            <td>
+                <input name="longitude" type="text" class="form-control" value="{$vo.longitude}"/>
+            </td>
+
+            <td class="td-head">纬度</td>
+            <td>
+                <input name="latitude" type="text" class="form-control" value="{$vo.latitude}"/>
+            </td>
+            </tr>
+            <td class="td-head">名称首拼</td>
+            <td>
+                <input id="pym" name="py" type="text" class="form-control" value="{$vo.dir_abbr}"/>
+            </td>
+            <td class="td-head">名称缩写</td>
+            <td>
+                <input id="mc" name="mc" type="text" class="form-control" value="{$vo.char_abbr}"/>
+            </td>
+            </tbody>
+        </table>
+    </div>
 </form>
 </body>
 <include file="public@scripts"/>
 <script src="__STATIC__/js/wind.js"></script>
 <script>
+    //上传图片
+    var upload = layui.upload;
+    upload.render({
+        elem: '#test1' //绑定元素
+        // , url: "{:cmf_plugin_url('Live://core/setupload')}" //上传接口
+        , url: "{:cmf_plugin_url('FileManage://image/upload_img')}" //上传接口
+        , data: {
+            'cat': 'live', 'width': 200, 'height': 200,
+        }
+        , multiple: true
+        , done: function (res, index, upload) {
+            if (res.code == 200) {
+                let src = res.data.fileurl
+                $('#test1').empty();
+                $('.xibtn').remove()
+                // $('.xibtn').remove()
+                $('#test1').append("<img src=\"" + src + "\" style=\"float: left;width: 100px\"/>");
+                $('#test1').append("<input type=\"hidden\" name=\"img_url\" value=\"" + res.data.fileurl + "\">");
+                $('#img_pre').append("<a class=\"btn btn-xs btn-danger js-ajax-delete xibtn\" onclick=\"de_img()\" style=\'float:left\'>删除</a></td>")
+                layer.msg(res.message)
+            } else {
+                layer.msg(res.message);
+            }
+        }
+        , error: function (index, upload) {
+            layer.msg('上传失败', {icon: 5});
+        }
+    });
 
+    function de_img() {
+        $('#test1').empty();
+        $('.xibtn').remove();
+        $('#test1').append("<a class=\"btn btn-xs btn-success\" style=\"margin: 4px 0px 0px 4px;float: left\">选择图片</a>");
+    }
 
 </script>
 </html>

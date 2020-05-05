@@ -266,12 +266,13 @@ class BaseModel
         if(empty($dir_id)){
             return zy_json_echo(false,'当月健康证:dir_id不能为空','',-1);
         }
-        $result['all_num']=Db::name('member_info')->where('school_id',$dir_id)->count();
-        $result['nor_num']=Db::name('member_info')->where('school_id',$dir_id)->where('health_endtime','>= time',date("Y-m-d",time()))->count();
+        $beginThismonth = mktime(0, 0, 0, date('m'), 1, date('Y'));
+        $result['all_num']=Db::name('member_info')->where('addtime','egt',$beginThismonth)->where('school_id',$dir_id)->count();
+        $result['nor_num']=Db::name('member_info')->where('addtime','egt',$beginThismonth)->where('school_id',$dir_id)->where('health_endtime','>= time',date("Y-m-d",time()))->count();
         if($result['nor_num']==0){
             $result['nor_ratio']=0;
         }else{
-            $result['nor_ratio']=ceil($result['nor_num']/$result['all_num']*100);
+            $result['nor_ratio']=round($result['nor_num']/$result['all_num']*100);
         }
         return $result;
     }
@@ -286,21 +287,27 @@ class BaseModel
         if(empty($dir_id)){
             return zy_json_echo(false,'上月健康证:dir_id不能为空','',-1);
         }
-        $result['last_all_num']=Db::name('member_info')->where('school_id',$dir_id)->count();
-        $result['last_nor_num']=Db::name('member_info')->where('school_id',$dir_id)->where('health_endtime','>= time',date("Y-m-d",time()))->count();
+//        $first=strtotime('-1 month');
+//        $last=strtotime('-1 month');
+        $first=date('Y-m-01 h:i:s', strtotime('-1 month'));
+        $last=date('Y-m-t h:i:s', strtotime('-1 month'));
+//        $result['last_all_num']=Db::name('member_info')->where('school_id',$dir_id)->count();
+//        $result['last_nor_num']=Db::name('member_info')->where('school_id',$dir_id)->where('health_endtime','>= time',date("Y-m-d",time()))->count();
         $result['last_all_num']=Db::name('member_info')
             ->where('school_id',$dir_id)
-            ->whereTime('addtime', '<=', date('Y-m-t', strtotime('-1 month')))
+            ->where('addtime','between time',[$first,$last])
+//            ->whereTime('addtime', '<=', date('Y-m-t', strtotime('-1 month')))
             ->count();
         $result['last_nor_num']=Db::name('member_info')
             ->where('school_id',$dir_id)
             ->where('health_endtime','>= time',date('Y-m-t', strtotime('-1 month')))
-            ->whereTime('addtime', '<=', date('Y-m-t', strtotime('-1 month')))
+//            ->whereTime('addtime', '<=', date('Y-m-t', strtotime('-1 month')))
+            ->where('addtime','between time',[$first,$last])
             ->count();
         if($result['last_nor_num']==0){
             $result['last_ratio']=0;
         }else{
-            $result['last_ratio']=ceil($result['last_nor_num']/$result['last_all_num']*100);
+            $result['last_ratio']=round($result['last_nor_num']/$result['last_all_num']*100);
         }
         return $result;
     }
@@ -318,7 +325,7 @@ class BaseModel
         $stat=Db::name('statistics_dir_stat')->where('month_section',date('Y-m', time()))->where('dir_id',$dir_id)->find();
         $result['face_num']=$stat['stranger_face_num']+$stat['emphasis_face_num'];
         $result['dis_num']=$stat['dis_stranger']+$stat['dis_emphasis'];
-        $result['dis_pro']= $result['dis_num']<1?0:ceil($result['dis_num']/$result['face_num']*100);
+        $result['dis_pro']= $result['dis_num']<1?0:round($result['dis_num']/$result['face_num']*100);
         return $result;
     }
     /**
@@ -335,7 +342,50 @@ class BaseModel
         $stat=Db::name('statistics_dir_stat')->where('month_section',date('Y-m', strtotime('-1 month')))->where('dir_id',$dir_id)->find();
         $result['last_face_num']=$stat['stranger_face_num']+$stat['emphasis_face_num'];
         $result['last_dis_num']=$stat['dis_stranger']+$stat['dis_emphasis'];
-        $result['last_dis_pro']= $result['last_dis_num']<1?0:ceil($result['last_dis_num']/$result['last_face_num']*100);
+        $result['last_dis_pro']= $result['last_dis_num']<1?0:round($result['last_dis_num']/$result['last_face_num']*100);
         return $result;
+    }
+    /**
+     * 学校12个月健康证过期比例
+     */
+    public static function year_health($dir_id=null)
+    {
+        $arr=[];
+        for ($i=0;$i<13;$i++){
+            $arr[$i]['month']=date('Y-m', strtotime(-$i.' month'));
+            $addmonth=date("Y-m",strtotime("+1 month",strtotime($arr[$i]['month'])));
+            $arr[$i]['end_time']=Db::name('member_info')->where('health_endtime','like %'.$arr[$i]['month'].'%')->count();
+        }
+        $stat=Db::name('statistics_dir_stat')->where('month_section',date('Y-m', strtotime('-1 month')))->where('dir_id',$dir_id)->find();
+    }
+    /**
+     * 学校12个月人脸抓拍
+     */
+    public static function year_face($dir_id=null)
+    {
+        $arr=[];
+        for ($i=0;$i<12;$i++){
+            $month=date('Y-m', strtotime(-$i.' month'));
+            $arr[$i]=Db::name('statistics_dir_stat')->where('dir_id',$dir_id)->where('month_section',$month)->find();
+            if(empty($arr[$i])){
+                $arr[$i]['id']=$dir_id;
+                $arr[$i]['month_section']=$month;
+                $arr[$i]['stranger_face_num']=0;
+                $arr[$i]['emphasis_face_num']=0;
+                $arr[$i]['dis_stranger']=0;
+                $arr[$i]['dis_emphasis']=0;
+            }
+            $num=$arr[$i]['stranger_face_num']+$arr[$i]['emphasis_face_num'];
+            $dis=$arr[$i]['dis_stranger']+$arr[$i]['dis_emphasis'];
+            $arr[$i]['dis_pro']=$dis<1?0:round($dis/$num*100);
+        }
+        return $arr;
+    }
+    /**
+     * 学校12个月事件处理率
+     */
+    public static function year_dis($dir_id=null)
+    {
+
     }
 }

@@ -10,8 +10,8 @@
         .sorttd{
             width: 86px;
         }
-        [v-cloak]{
-            display: none
+        .d_btn{
+            padding: 4px 8px;
         }
     </style>
 </head>
@@ -30,7 +30,7 @@
     <input type="text" class="form-control" name="text" style="width: 180px;" value="{:input('request.text/s','')}" placeholder="请输入关键字">
    <input type="submit" class="btn btn-primary" value="搜索"/>
     <a class="btn btn-danger" href="{:cmf_plugin_url('Resource://index/index')}">清空</a>
-    <a href="javascript:;" class="btn btn-info" onclick="create()">创建</a>
+    <a href="javascript:;" class="btn btn-info" onclick="renewal()">更新数据</a>
 </form>
     <table class="table table-bordered table-hover" style="text-align:center;">
         <thead>
@@ -50,10 +50,24 @@
             </td>
             <td>{$vo.id}</td>
             <td align="center" class="sorttd"><input name="sort" type="text" class="form-control" style="width: 50px;height: 30px; text-align: center;margin-left: 9px" value="{$vo.sort}"/></td>
-            <td ><a href="{:cmf_plugin_url('Resource://school/index')}?search_key=2&text={$vo.name}">{$vo.name}</a></td>
+
+            <td >
+                <if condition="!empty($vo.abbr)">
+                <a href="{:cmf_plugin_url('Resource://school/index')}?search_key=2&text={$vo.name}">{$vo.name}</a>
+                    <else/>
+                    {$vo.name}
+                </if>
+            </td>
             <td><present name="vo.parent_name">{$vo.parent_name}</present></td>
             <td style="">
-                <a href="javascript:" class="btn btn-xs btn-success " onclick="edit({$vo.id})">编辑</a>
+                <if condition="$vo.is_show eq 0">
+                    <a class="btn btn-xs btn-warning js-ajax-delete"  href="{:cmf_plugin_url('resource://index/upStatus')}?id={$vo.id}&code=1" data-msg="确定显示吗？"
+                       data-refresh="{:cmf_plugin_url('resource://general/index')}">隐藏</a>
+                    <else/>
+                    <a class="btn btn-xs btn-info js-ajax-delete"  href="{:cmf_plugin_url('resource://index/upStatus')}?id={$vo.id}&code=0" data-msg="确定隐藏吗？"
+                       data-refresh="{:cmf_plugin_url('resource://general/index')}">显示</a>
+                </if>
+<!--                <a href="javascript:" class="btn btn-xs btn-success " onclick="edit({$vo.id})">编辑</a>-->
                 <a class="btn btn-xs btn-danger js-ajax-delete"  href="{:cmf_plugin_url('Resource://index/delete')}?id={$vo.id}" data-msg="确定删除此条区域吗？"
                    data-refresh="{:cmf_plugin_url('Resource://index/index')}">删除</a>
             </td>
@@ -61,11 +75,10 @@
         </volist>
         </tbody>
     </table>
-    <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" name="category"
+    <button type="button" class="btn btn-sm btn-warning d_btn" data-toggle="dropdown" name="category"
             value="0" aria-haspopup="true" aria-expanded="false" onclick="sortarr()"> 批量排序</button>
-    <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" name="category"
+    <button type="button" class="btn btn-sm btn-danger d_btn" data-toggle="dropdown" name="category"
             value="0" aria-haspopup="true" aria-expanded="false" onclick="deletearr()"> 批量删除</button>
-    <button onclick="cc()">发送</button>
 </div>
 </body>
 <include file='public/scripts'/>
@@ -77,24 +90,6 @@
 <link  rel="stylesheet" type="text/css" href="__PLUGIN_TMPL__/public/balabala/iconfont.css">
 
 <script type="text/javascript">
-        ws = new WebSocket("ws://192.168.0.40:7272");
-        // 服务端主动推送消息时会触发这里的onmessage
-        ws.onmessage = function(e){
-            // json数据转换成js对象
-            let data = eval("("+e.data+")");
-            let type = data.type || '';
-            console.log(data)
-            switch(type){
-                case 'init':
-                    console.log('aa')
-                    break;
-                default :
-                    layer.msg(e.data);
-            }
-        };
-        // let t2 = window.setInterval(function() {
-        //     ws.send("发送数据")
-        // },7000)
     //批量排序
     function sortarr(){
         let url="{:cmf_plugin_url('Resource://index/sortArr')}"
@@ -192,6 +187,10 @@
                 sendajax(data, url);
             }
         });
+    }
+    function renewal(){
+        let url="{:cmf_plugin_url('Resource://Index/renewal')}";
+        sendajax('', url);
     }
 </script>
 
